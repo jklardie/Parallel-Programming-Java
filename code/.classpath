@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="ipl-2.3/benchmarks/src"/>
+	<classpathentry kind="src" path="ipl-2.3/examples/src"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="ipl-2.3/benchmarks/lib/ipl-benchmarks.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/examples/lib/ipl-examples.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/antenna-bin-1.0.0.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/asm-all-4.0.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/bcel-5.3-SNAPSHOT-1000411.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/commons-jxpath-1.1.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/commons-logging-api.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-compile-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-io-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-util-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-dummy-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-lrmc-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-multi-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-nio-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-smartsockets-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-tcp-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-support-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/jstun-0.6.1.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/juds-0.94-universal.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/sbbi-upnplib-1.0.2.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/slf4j-api-1.5.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/slf4j-log4j12-1.5.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/smartsockets-1.62.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/TGGraphLayout-ibis-1.58.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/trilead-ssh2-r13339-CJ.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
