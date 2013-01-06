@@ -359,12 +359,8 @@ public class Rubiks implements MessageUpcall {
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
         
-        // finish the request message. This MUST be done before sending
-        // the reply message. It ALSO means Ibis may now call this upcall
-        // method again with the next request message
-        msg.finish();
-        
         int msgType = msg.readInt();
+        
         switch(msgType){
             case MSG_TYPE_WORK_REQ:
                 handleWorkReqMsg(requestor);
@@ -373,6 +369,11 @@ public class Rubiks implements MessageUpcall {
                 int numSteps = msg.readInt();
                 handleResultMsg(numSolutions, numSteps);
         }
+        
+        // finish the request message. This MUST be done before sending
+        // the reply message. It ALSO means Ibis may now call this upcall
+        // method again with the next request message
+        msg.finish();
     }
     
     public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
