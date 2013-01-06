@@ -5,7 +5,13 @@ import ibis.ipl.IbisCapabilities;
 import ibis.ipl.IbisCreationFailedException;
 import ibis.ipl.IbisFactory;
 import ibis.ipl.IbisIdentifier;
+import ibis.ipl.MessageUpcall;
 import ibis.ipl.PortType;
+import ibis.ipl.ReadMessage;
+import ibis.ipl.ReceivePort;
+import ibis.ipl.ReceivePortIdentifier;
+import ibis.ipl.SendPort;
+import ibis.ipl.WriteMessage;
 
 import java.io.IOException;
 
@@ -15,17 +21,33 @@ import java.io.IOException;
  * @author Niels Drost, Timo van Kessel
  * 
  */
-public class Rubiks {
+public class Rubiks implements MessageUpcall {
     
-    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE,
+    /**
+     * Port type used for sending a work request to the master
+     */
+    PortType requestPortType = new PortType(PortType.COMMUNICATION_RELIABLE,
+            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_AUTO_UPCALLS,
+            PortType.CONNECTION_MANY_TO_ONE);
+
+    /**
+     * Port type used for sending a reply back
+     */
+    PortType replyPortType = new PortType(PortType.COMMUNICATION_RELIABLE,
             PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,
             PortType.CONNECTION_ONE_TO_ONE);
-
+    
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT);
+
+    private Ibis ibis;
+
+    private Cube cube;
     
     public static final boolean PRINT_SOLUTION = false;
+    private static final String WORK_REQ_PORT = "work_req_port";
 
+    
     /**
      * Recursive function to find a solution for a given cube. Only searches to
      * the bound set in the cube object.
@@ -121,22 +143,125 @@ public class Rubiks {
         System.out.println("");
     }
     
-    public void master(Ibis ibis){
+    public void master(int size, int twists, int seed, String fileName) throws IOException{
         System.out.println("I am the master");
+        
+        cube = null;
+
+        // create cube
+        if (fileName == null) {
+            cube = new Cube(size, twists, seed);
+        } else {
+            try {
+                cube = new Cube(fileName);
+            } catch (Exception e) {
+                System.err.println("Cannot load cube from file: " + e);
+                System.exit(1);
+            }
+        }
+        
+        // print cube info
+        System.out.println("Searching for solution for cube of size "
+                + cube.getSize() + ", twists = " + twists + ", seed = " + seed);
+        cube.print(System.out);
+        System.out.flush();
+        
+        // create port to receive work requests
+        ReceivePort receiver = ibis.createReceivePort(requestPortType, WORK_REQ_PORT, this);
+        
+        receiver.enableConnections();
+        receiver.enableMessageUpcalls();
+        
+        // solve
+        long start = System.currentTimeMillis();
+//        solve(cube);
+        long end = System.currentTimeMillis();
+
+        receiver.close();
+        
+        // NOTE: this is printed to standard error! The rest of the output is
+        // constant for each set of parameters. Printing this to standard error
+        // makes the output of standard out comparable with "diff"
+        System.err.println("Solving cube took " + (end - start)
+                + " milliseconds");
     }
     
-    public void slave(Ibis ibis, IbisIdentifier master){
-        System.out.println("I am a slave");
+    public void slave(IbisIdentifier master) throws IOException {
+        // Create a send port for sending the request and connect.
+        SendPort sendPort = ibis.createSendPort(requestPortType);
+        sendPort.connect(master, WORK_REQ_PORT);
+        
+        // Create a receive port for receiving the reply from the server
+        // this receive port does not need a name, as we will send the
+        // ReceivePortIdentifier to the server directly
+        ReceivePort receivePort = ibis.createReceivePort(replyPortType, null);
+        receivePort.enableConnections();
+        
+        // Send the request message. This message contains the identifier of
+        // our receive port so the server knows where to send the reply
+        WriteMessage request = sendPort.newMessage();
+        request.writeObject(receivePort.identifier());
+        request.finish();
+
+        // Get cube object from msg
+        ReadMessage reply = receivePort.receive();
+        Cube workCube;
+        try {
+            workCube = (Cube) reply.readObject();
+            System.out.println("Got work to do. Bound: " + workCube.getBound());
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        reply.finish();
+
+        // Close ports.
+        sendPort.close();
+        receivePort.close();
+        
     }
 
     public void run(String[] args) throws IbisCreationFailedException, IOException{
-        Ibis ibis = IbisFactory.createIbis(ibisCapabilities, null, portType);
+        // default parameters of puzzle
+        int size = 3;
+        int twists = 11;
+        int seed = 0;
+        String fileName = null;
+
+        // number of threads used to solve puzzle
+        // (not used in sequential version)
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equalsIgnoreCase("--size")) {
+                i++;
+                size = Integer.parseInt(args[i]);
+            } else if (args[i].equalsIgnoreCase("--twists")) {
+                i++;
+                twists = Integer.parseInt(args[i]);
+            } else if (args[i].equalsIgnoreCase("--seed")) {
+                i++;
+                seed = Integer.parseInt(args[i]);
+            } else if (args[i].equalsIgnoreCase("--file")) {
+                i++;
+                fileName = args[i];
+            } else if (args[i].equalsIgnoreCase("--help") || args[i].equalsIgnoreCase("-h")) {
+                printUsage();
+                System.exit(0);
+            } else {
+                System.err.println("unknown option : " + args[i]);
+                printUsage();
+                System.exit(1);
+            }
+        }
+        
+        ibis = IbisFactory.createIbis(ibisCapabilities, null, requestPortType, replyPortType);
         IbisIdentifier master = ibis.registry().elect("master");
         
         if (master.equals(ibis.identifier())) {
-            master(ibis);
+            master(size, twists, seed, fileName);
         } else {
-            slave(ibis, master);
+            slave(master);
         }
 
         ibis.end();
@@ -146,6 +271,7 @@ public class Rubiks {
      * Main function.
      * 
      * @param arguments
+     * 
      *            list of arguments
      */
     public static void main(String[] args) {
@@ -159,6 +285,33 @@ public class Rubiks {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
+        ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
+        
+        // finish the request message. This MUST be done before sending
+        // the reply message. It ALSO means Ibis may now call this upcall
+        // method agian with the next request message
+        msg.finish();
+        
+        // create a sendport for the reply
+        SendPort replyPort = ibis.createSendPort(replyPortType);
+
+        // connect to the requestor's receive port
+        replyPort.connect(requestor);
+
+        // create a reply message
+        WriteMessage reply = replyPort.newMessage();
+        
+        synchronized (cube) {
+            cube.setBound(cube.getBound()+1);
+            reply.writeObject(cube);
+            reply.finish();
+        }
+
+        replyPort.close();
     }
 
 }
