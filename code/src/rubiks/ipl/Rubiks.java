@@ -1,5 +1,14 @@
 package rubiks.ipl;
 
+import ibis.ipl.Ibis;
+import ibis.ipl.IbisCapabilities;
+import ibis.ipl.IbisCreationFailedException;
+import ibis.ipl.IbisFactory;
+import ibis.ipl.IbisIdentifier;
+import ibis.ipl.PortType;
+
+import java.io.IOException;
+
 /**
  * Solver for rubik's cube puzzle.
  * 
@@ -7,6 +16,13 @@ package rubiks.ipl;
  * 
  */
 public class Rubiks {
+    
+    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE,
+            PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,
+            PortType.CONNECTION_ONE_TO_ONE);
+
+    IbisCapabilities ibisCapabilities = new IbisCapabilities(
+            IbisCapabilities.ELECTIONS_STRICT);
     
     public static final boolean PRINT_SOLUTION = false;
 
@@ -104,77 +120,44 @@ public class Rubiks {
                 .println("--file FILE_NAME\t\tLoad cube from given file instead of generating it");
         System.out.println("");
     }
+    
+    public void master(Ibis ibis){
+        System.out.println("I am the master");
+    }
+    
+    public void slave(Ibis ibis, IbisIdentifier master){
+        System.out.println("I am a slave");
+    }
 
+    public void run(String[] args) throws IbisCreationFailedException, IOException{
+        Ibis ibis = IbisFactory.createIbis(ibisCapabilities, null, portType);
+        IbisIdentifier master = ibis.registry().elect("master");
+        
+        if (master.equals(ibis.identifier())) {
+            master(ibis);
+        } else {
+            slave(ibis, master);
+        }
+
+        ibis.end();
+    }
+    
     /**
      * Main function.
      * 
      * @param arguments
      *            list of arguments
      */
-    public static void main(String[] arguments) {
-        Cube cube = null;
-
-        // default parameters of puzzle
-        int size = 3;
-        int twists = 11;
-        int seed = 0;
-        String fileName = null;
-
-        // number of threads used to solve puzzle
-        // (not used in sequential version)
-
-        for (int i = 0; i < arguments.length; i++) {
-            if (arguments[i].equalsIgnoreCase("--size")) {
-                i++;
-                size = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--twists")) {
-                i++;
-                twists = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--seed")) {
-                i++;
-                seed = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--file")) {
-                i++;
-                fileName = arguments[i];
-            } else if (arguments[i].equalsIgnoreCase("--help") || arguments[i].equalsIgnoreCase("-h")) {
-                printUsage();
-                System.exit(0);
-            } else {
-                System.err.println("unknown option : " + arguments[i]);
-                printUsage();
-                System.exit(1);
-            }
+    public static void main(String[] args) {
+        try {
+            new Rubiks().run(args);
+        } catch (IbisCreationFailedException e) {
+            System.err.println("Exception while creating Ibis instance");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("IOException while electing a master");
+            e.printStackTrace();
         }
-
-        // create cube
-        if (fileName == null) {
-            cube = new Cube(size, twists, seed);
-        } else {
-            try {
-                cube = new Cube(fileName);
-            } catch (Exception e) {
-                System.err.println("Cannot load cube from file: " + e);
-                System.exit(1);
-            }
-        }
-        
-        // print cube info
-        System.out.println("Searching for solution for cube of size "
-                + cube.getSize() + ", twists = " + twists + ", seed = " + seed);
-        cube.print(System.out);
-        System.out.flush();
-
-        
-        // solve
-        long start = System.currentTimeMillis();
-        solve(cube);
-        long end = System.currentTimeMillis();
-
-        // NOTE: this is printed to standard error! The rest of the output is
-        // constant for each set of parameters. Printing this to standard error
-        // makes the output of standard out comparable with "diff"
-        System.err.println("Solving cube took " + (end - start)
-                + " milliseconds");
 
     }
 
