@@ -268,6 +268,7 @@ public class Rubiks implements MessageUpcall {
         
         while(true){
             Cube workCube = requestWork(master);
+            System.out.println("[" + ibis.identifier().name() + "] Received work. Bound: " + workCube.getBound());
             if(workCube == null){
                 // no work to do
                 return;
@@ -359,6 +360,8 @@ public class Rubiks implements MessageUpcall {
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
         
+        System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.name());
+        
         int msgType = msg.readInt();
         
         switch(msgType){
@@ -377,6 +380,8 @@ public class Rubiks implements MessageUpcall {
     }
     
     public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
+        System.out.println("[" + ibis.identifier().name() + "] handle work request msg");
+        
         // create a sendport for the reply
         SendPort replyPort = ibis.createSendPort(replyPortType);
 
@@ -394,6 +399,8 @@ public class Rubiks implements MessageUpcall {
     }
     
     private Cube getWorkCube() {
+        System.out.println("[" + ibis.identifier().name() + "] get work cube");
+        
         // only send work if the best result is not optimal yet
         
         synchronized(cube){
@@ -409,6 +416,8 @@ public class Rubiks implements MessageUpcall {
     }
 
     public synchronized void handleResultMsg(int numSolutions, int numSteps) throws IOException{
+        System.out.println("[" + ibis.identifier().name() + "] handle result msg");
+        
         if(numSteps < bestResult){
             bestResult = numSteps;
             numBestSolutions = numSolutions;
