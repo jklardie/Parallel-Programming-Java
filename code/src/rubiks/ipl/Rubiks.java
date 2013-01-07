@@ -360,7 +360,7 @@ public class Rubiks implements MessageUpcall {
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
         
-        System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.name());
+        System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.ibisIdentifier().name());
         
         int msgType = msg.readInt();
         
@@ -380,7 +380,7 @@ public class Rubiks implements MessageUpcall {
     }
     
     public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
-        System.out.println("[" + ibis.identifier().name() + "] handle work request msg");
+        System.out.println("[" + ibis.identifier().name() + "] handle work request msg from " + requestor.ibisIdentifier().name());
         
         // create a sendport for the reply
         SendPort replyPort = ibis.createSendPort(replyPortType);
@@ -396,6 +396,8 @@ public class Rubiks implements MessageUpcall {
         reply.finish();
 
         replyPort.close();
+        
+        System.out.println("[" + ibis.identifier().name() + "] sent work to " + requestor.ibisIdentifier().name());
     }
     
     private Cube getWorkCube() {
