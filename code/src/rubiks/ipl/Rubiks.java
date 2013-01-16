@@ -249,11 +249,14 @@ public class Rubiks implements MessageUpcall {
             }
         }
         
+        System.out.println("Sending result broadcast to " + joinedIbises.length + " ibises. #solutions: " + numSolutions + ". numSteps: " + numSteps);
+        
         try {
             WriteMessage message = sendPort.newMessage();
             // one way communication, no receiving port waiting for a reply, so send null
             message.writeObject(null);
             
+            message.writeInt(MSG_TYPE_RESULT);
             message.writeInt(numSolutions);
             message.writeInt(numSteps);
             message.finish();
@@ -366,6 +369,8 @@ public class Rubiks implements MessageUpcall {
         
         if(requestor != null){
             System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.ibisIdentifier().name());
+        } else {
+            System.out.println("[" + ibis.identifier().name() + "] new msg upcall");
         }
         
         int msgType = msg.readInt();
