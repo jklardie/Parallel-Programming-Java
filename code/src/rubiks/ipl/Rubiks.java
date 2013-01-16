@@ -425,10 +425,8 @@ public class Rubiks implements MessageUpcall {
             bestResult = numSteps;
             numBestSolutions = numSolutions;
             
-            synchronized(cube){
-                if(!isMaster & cube.getBound() >= bestResult-1){
-                    ibis.registry().terminate();
-                }
+            if(!isMaster & cube.getBound() >= bestResult){
+                ibis.registry().terminate();
             }
         }
     }
