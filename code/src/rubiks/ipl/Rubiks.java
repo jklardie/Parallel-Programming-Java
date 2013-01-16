@@ -94,7 +94,7 @@ public class Rubiks implements MessageUpcall {
         for (Cube child : children) {
             // recursion step
             int childSolutions = solutions(child, cache);
-            if (childSolutions > 0 && cube.getTwists() > cube.getBound()) {
+            if (childSolutions > 0) {
                 numSolutions += childSolutions;
                 if (PRINT_SOLUTION) {
                     child.print(System.err);
