@@ -266,7 +266,9 @@ public class Rubiks implements MessageUpcall {
     public void slave(IbisIdentifier master) throws IOException {
         isMaster = false;
         
-        while(true){
+        int numSolutions = 0;
+        
+        while(numSolutions == 0){
             Cube workCube = requestWork(master);
             System.out.println("[" + ibis.identifier().name() + "] Received work. Bound: " + workCube.getBound());
             if(workCube == null){
@@ -274,7 +276,8 @@ public class Rubiks implements MessageUpcall {
                 return;
             }
             
-            int numSolutions = solve(workCube);
+            numSolutions = solve(workCube);
+            System.out.println("[" + ibis.identifier().name() + "] Bound:  " + workCube.getBound() + ". Number of solutions: " + numSolutions);            
             
             if(numSolutions > 0){
                 int numSteps = workCube.getBound();
@@ -366,17 +369,20 @@ public class Rubiks implements MessageUpcall {
         
         switch(msgType){
             case MSG_TYPE_WORK_REQ:
+                msg.finish();
                 handleWorkReqMsg(requestor);
+                break;
             case MSG_TYPE_RESULT:
                 int numSolutions = msg.readInt();
                 int numSteps = msg.readInt();
+                msg.finish();
                 handleResultMsg(numSolutions, numSteps);
+                break;
         }
         
         // finish the request message. This MUST be done before sending
         // the reply message. It ALSO means Ibis may now call this upcall
         // method again with the next request message
-        msg.finish();
     }
     
     public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
