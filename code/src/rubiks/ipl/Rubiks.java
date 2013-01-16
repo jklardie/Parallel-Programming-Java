@@ -45,7 +45,8 @@ public class Rubiks implements MessageUpcall {
             PortType.CONNECTION_ONE_TO_MANY, PortType.CONNECTION_DOWNCALLS);
     
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
-            IbisCapabilities.ELECTIONS_STRICT);
+            IbisCapabilities.ELECTIONS_STRICT,
+            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED);
 
     private Ibis ibis;
 
