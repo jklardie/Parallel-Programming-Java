@@ -417,6 +417,7 @@ public class Rubiks implements MessageUpcall {
     public synchronized void handleResultMsg(int numSolutions, int numSteps) throws IOException{
         if(cube == null){
             // it is possible that the cube is not initialized yet
+            ibis.registry().terminate();
             return;
         }
         
