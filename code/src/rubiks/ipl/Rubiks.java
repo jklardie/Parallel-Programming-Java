@@ -283,6 +283,8 @@ public class Rubiks implements MessageUpcall {
             if(numSolutions > 0){
                 int numSteps = workCube.getBound();
                 broadcastResult(numSolutions, numSteps);
+                
+                ibis.registry().terminate();
             }
         }
     }
