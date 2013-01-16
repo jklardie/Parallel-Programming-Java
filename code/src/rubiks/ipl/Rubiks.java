@@ -364,7 +364,9 @@ public class Rubiks implements MessageUpcall {
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
         
-        System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.ibisIdentifier().name());
+        if(requestor != null){
+            System.out.println("[" + ibis.identifier().name() + "] new msg upcall from " + requestor.ibisIdentifier().name());
+        }
         
         int msgType = msg.readInt();
         
