@@ -46,7 +46,8 @@ public class Rubiks implements MessageUpcall {
     
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
-            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED);
+            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
+            IbisCapabilities.TERMINATION);
 
     private Ibis ibis;
 
@@ -179,19 +180,15 @@ public class Rubiks implements MessageUpcall {
         
         long start = System.currentTimeMillis();
         
-        synchronized (this) {
-            while (!finished) {
-                try {
-                    wait();
-                } catch (Exception e) {
-                    // ignored
-                }
-            }
-        }
+        ibis.registry().waitUntilTerminated();
         
         long end = System.currentTimeMillis();
-
+        
         receiver.close();
+        
+        System.out.println();
+        System.out.println("Solving cube possible in " + numBestSolutions + " ways of "
+                + bestResult + " steps");
         
         // NOTE: this is printed to standard error! The rest of the output is
         // constant for each set of parameters. Printing this to standard error
@@ -439,10 +436,8 @@ public class Rubiks implements MessageUpcall {
             numBestSolutions = numSolutions;
             
             synchronized(cube){
-                if(cube.getBound() >= bestResult-1){
+                if(!isMaster & cube.getBound() >= bestResult-1){
                     ibis.registry().terminate();
-                    finished = true;
-                    notifyAll();
                 }
             }
         }
