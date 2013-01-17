@@ -271,6 +271,8 @@ public class Rubiks implements MessageUpcall {
             Cube workCube = requestWork(master);
             if(workCube == null){
                 // no work to do
+                System.out.println("[" + ibis.identifier().name() + "] no work to do. Terminating");
+                ibis.registry().terminate();
                 return;
             }
             
@@ -280,6 +282,7 @@ public class Rubiks implements MessageUpcall {
                 int numSteps = workCube.getBound();
                 broadcastResult(numSolutions, numSteps);
                 
+                System.out.println("[" + ibis.identifier().name() + "] found result. Broadcasted. Terminating");
                 ibis.registry().terminate();
             }
         }
@@ -418,6 +421,7 @@ public class Rubiks implements MessageUpcall {
         if(cube == null){
             // it is possible that the cube is not initialized yet
             ibis.registry().terminate();
+            System.out.println("[" + ibis.identifier().name() + "] cube is null. Terminating");
             return;
         }
         
@@ -426,6 +430,7 @@ public class Rubiks implements MessageUpcall {
             numBestSolutions = numSolutions;
             
             if(!isMaster & cube.getBound() >= bestResult){
+                System.out.println("[" + ibis.identifier().name() + "] received better result. Terminating");
                 ibis.registry().terminate();
             }
         }
