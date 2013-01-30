@@ -384,7 +384,7 @@ public class Rubiks implements MessageUpcall {
     }
     
     private synchronized void computeResults(){
-        System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
+//        System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
         // master is in charge of printing final result
         
         // wait until all other processes have terminated
@@ -403,6 +403,8 @@ public class Rubiks implements MessageUpcall {
         // makes the output of standard out comparable with "diff"
         System.err.println("Solving cube took " + (end - start)
                 + " milliseconds");
+        
+        terminate();
     }
     
     private void terminate(){
