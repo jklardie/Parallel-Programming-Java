@@ -226,8 +226,13 @@ public class Rubiks implements MessageUpcall {
                     int numSteps = cube.getBound();
                     broadcastResult(numSolutions, numSteps);
                     
-                    ibis.registry().terminate();
                     shouldStopWorking = true;
+                    
+                    if(!isMaster){
+                        terminate();
+                    } else {
+                        computeResults();
+                    }
                 }
             }
         }
@@ -240,6 +245,10 @@ public class Rubiks implements MessageUpcall {
     }
     
     private void broadcastResult(int numSolutions, int numSteps) throws IOException {
+        if(getNumNodes() <= 1){
+            return;
+        }
+        
         SendPort sendPort = ibis.createSendPort(broadcastPortType);
         
         IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
@@ -362,25 +371,7 @@ public class Rubiks implements MessageUpcall {
                     // slave simply terminates at this point
                     terminate();
                 } else {
-                    System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
-                    // master is in charge of printing final result
-                    
-                    // wait until all other processes have terminated
-                    ibis.registry().waitUntilTerminated();
-                    
-                    long end = System.currentTimeMillis();
-                    
-                    System.out.println();
-                    System.out.println("Solving cube possible in " + numBestSolutions + " ways of "
-                            + bestResult + " steps");
-                    
-                    // NOTE: this is printed to standard error! The rest of the output is
-                    // constant for each set of parameters. Printing this to standard error
-                    // makes the output of standard out comparable with "diff"
-                    System.err.println("Solving cube took " + (end - start)
-                            + " milliseconds");
-                    
-                    terminate();
+                    computeResults();
                 }
             }
             
@@ -388,9 +379,34 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private void terminate() throws IOException{
-        ibis.registry().terminate();
-        ibis.end();
+    private void computeResults(){
+        System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
+        // master is in charge of printing final result
+        
+        // wait until all other processes have terminated
+        ibis.registry().waitUntilTerminated();
+        
+        long end = System.currentTimeMillis();
+        
+        System.out.println();
+        System.out.println("Solving cube possible in " + numBestSolutions + " ways of "
+                + bestResult + " steps");
+        
+        // NOTE: this is printed to standard error! The rest of the output is
+        // constant for each set of parameters. Printing this to standard error
+        // makes the output of standard out comparable with "diff"
+        System.err.println("Solving cube took " + (end - start)
+                + " milliseconds");
+    }
+    
+    private void terminate(){
+        try {
+            ibis.registry().terminate();
+            ibis.end();
+        } catch (IOException e) {
+            // do nothing. 
+        }
+        
         System.exit(1);
     }
     
