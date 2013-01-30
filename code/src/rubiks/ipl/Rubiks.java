@@ -32,6 +32,7 @@ public class Rubiks implements MessageUpcall {
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
             IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
+            IbisCapabilities.CLOSED_WORLD,
             IbisCapabilities.TERMINATION);
 
     private Ibis ibis;
@@ -47,8 +48,6 @@ public class Rubiks implements MessageUpcall {
 
     private int currentBound;
 
-    private int numNodes = -1;
-    
     public static final boolean PRINT_SOLUTION = false;
     
     private static final String BROADCAST_PORT = "broadcast_port";
@@ -189,7 +188,7 @@ public class Rubiks implements MessageUpcall {
         }
         
         
-        int numNodes = getNumNodes();
+        int numNodes = getPoolSize();
         
         // calculate the number of roots each node will handle
         int numRoots = numGrandChildren / numNodes;
@@ -239,19 +238,13 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private int getNumNodes(){
-        if(numNodes  == -1){
-            IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
-            System.out.println("[" + ibis.identifier() + "] num nodes: " + joinedIbises.length);
-            numNodes = joinedIbises.length;
-        }
-        
-        return numNodes;
+    private int getPoolSize(){
+        return ibis.registry().getPoolSize();
     }
     
     private void broadcastResult(int numSolutions, int numSteps) throws IOException {
         System.out.println("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numSteps);
-        if(getNumNodes() <= 1){
+        if(getPoolSize() <= 1){
             System.out.println("[" + ibis.identifier() + "] Only one node. Not broadcasting");
             return;
         }
@@ -393,7 +386,7 @@ public class Rubiks implements MessageUpcall {
         // master is in charge of printing final result
         
         // wait until all other processes have terminated
-        if(getNumNodes() > 1){
+        if(getPoolSize() > 1){
             ibis.registry().waitUntilTerminated();
         }
         
