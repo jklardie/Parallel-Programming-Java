@@ -216,36 +216,38 @@ public class Rubiks implements MessageUpcall {
                 
                 cube.setBound(cube.getBound()+1);
                 currentBound = cube.getBound();
-                System.out.println("[" + ibis.identifier() + "] Incremented bound to " + currentBound);
                 
                 numSolutions = solve(cube);
                 
-                System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
-                
                 if(numSolutions > 0){
+                    System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
+                    
                     int numSteps = cube.getBound();
                     broadcastResult(numSolutions, numSteps);
                     
                     shouldStopWorking = true;
-                    
-                    if(!isMaster){
-                        terminate();
-                    } else {
-                        computeResults();
-                    }
                 }
             }
+        }
+        
+        if(isMaster){
+            computeResults();
+        } else {
+            terminate();
         }
         
     }
     
     private int getNumNodes(){
         IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
+        System.out.println("[" + ibis.identifier() + "] num nodes: " + joinedIbises.length);
         return joinedIbises.length;
     }
     
     private void broadcastResult(int numSolutions, int numSteps) throws IOException {
+        System.out.println("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numSteps);
         if(getNumNodes() <= 1){
+            System.out.println("[" + ibis.identifier() + "] Only one node. Not broadcasting");
             return;
         }
         
@@ -258,6 +260,8 @@ public class Rubiks implements MessageUpcall {
                 sendPort.connect(joinedIbis, BROADCAST_PORT);
             }
         }
+        
+        System.out.println("[" + ibis.identifier() + "] Broadcasting to " + (joinedIbises.length-1) + " nodes");
         
         try {
             WriteMessage message = sendPort.newMessage();
@@ -384,7 +388,9 @@ public class Rubiks implements MessageUpcall {
         // master is in charge of printing final result
         
         // wait until all other processes have terminated
-        ibis.registry().waitUntilTerminated();
+        if(getNumNodes() > 1){
+            ibis.registry().waitUntilTerminated();
+        }
         
         long end = System.currentTimeMillis();
         
