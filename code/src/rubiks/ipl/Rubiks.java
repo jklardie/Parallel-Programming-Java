@@ -52,9 +52,6 @@ public class Rubiks implements MessageUpcall {
     private static final String BROADCAST_PORT = "broadcast_port";
     private static final String SEQ_NUM = "seq_num";
 
-    private static final int MSG_TYPE_RESULT    = 0;
-
-
     
     /**
      * Recursive function to find a solution for a given cube. Only searches to
@@ -136,7 +133,7 @@ public class Rubiks implements MessageUpcall {
         System.out.println("");
     }
     
-    public void doWork(int size, int twists, int seed, String fileName) throws IOException{
+    private Cube initCube(int size, int twists, int seed, String fileName){
         cube = null;
 
         // create cube
@@ -150,6 +147,13 @@ public class Rubiks implements MessageUpcall {
                 System.exit(1);
             }
         }
+        
+        return cube;
+    }
+    
+    
+    public void doWork(int size, int twists, int seed, String fileName) throws IOException{
+        cube = initCube(size, twists, seed, fileName);
         
         if(isMaster){
             // print cube info
@@ -189,7 +193,7 @@ public class Rubiks implements MessageUpcall {
         int numRoots = numGrandChildren / numNodes;
         int seqNum = new Long(ibis.registry().getSequenceNumber(SEQ_NUM)).intValue();
         
-        System.out.println("My seqNum: " + seqNum + ". numRoots: " + numRoots);
+        System.out.println("[" + ibis.identifier() + "] My seqNum: " + seqNum + ". numRoots: " + numRoots);
         
         Cube[] cubes = new Cube[numRoots];
         System.arraycopy(grandChildren, seqNum * numRoots, cubes, 0, numRoots);
@@ -204,6 +208,7 @@ public class Rubiks implements MessageUpcall {
             
             for(Cube cube : cubes){
                 if(cube.getBound() == 0){
+                    System.out.println("[" + ibis.identifier() + "] Bound is 0, setting it to 2 (did two twists already)");
                     // we did two twists (one to generate children, one for grand children),
                     // so set bound accordingly
                     cube.setBound(2);
@@ -211,8 +216,11 @@ public class Rubiks implements MessageUpcall {
                 
                 cube.setBound(cube.getBound()+1);
                 currentBound = cube.getBound();
+                System.out.println("[" + ibis.identifier() + "] Incremented bound to " + currentBound);
                 
                 numSolutions = solve(cube);
+                
+                System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
                 
                 if(numSolutions > 0){
                     int numSteps = cube.getBound();
@@ -244,8 +252,6 @@ public class Rubiks implements MessageUpcall {
         
         try {
             WriteMessage message = sendPort.newMessage();
-            // one way communication, no receiving port waiting for a reply, so send null
-            message.writeInt(MSG_TYPE_RESULT);
             message.writeInt(numSolutions);
             message.writeInt(numSteps);
             message.finish();
@@ -328,16 +334,11 @@ public class Rubiks implements MessageUpcall {
 
     @Override
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
-        int msgType = msg.readInt();
-        
-        switch(msgType){
-            case MSG_TYPE_RESULT:
-                int numSolutions = msg.readInt();
-                int numSteps = msg.readInt();
-                msg.finish();
-                handleResultMsg(numSolutions, numSteps);
-                break;
-        }
+        System.out.println("Received new result msg");
+        int numSolutions = msg.readInt();
+        int numSteps = msg.readInt();
+        msg.finish();
+        handleResultMsg(numSolutions, numSteps);
     }
     
     public synchronized void handleResultMsg(int numSolutions, int numSteps) throws IOException{
@@ -348,16 +349,20 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(numSteps < bestResult){
+            System.out.println("[" + ibis.identifier() + "] Result is better than mine");
             bestResult = numSteps;
             numBestSolutions = numSolutions;
             
             if(currentBound >= bestResult){
+                System.out.println("[" + ibis.identifier() + "] My bound is larger or equal to the best result");
                 shouldStopWorking = true; 
                 
                 if(!isMaster){
+                    System.out.println("[" + ibis.identifier() + "] Not a master, terminating");
                     // slave simply terminates at this point
                     terminate();
                 } else {
+                    System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
                     // master is in charge of printing final result
                     
                     // wait until all other processes have terminated
