@@ -22,6 +22,14 @@ import java.io.IOException;
  */
 public class Rubiks implements MessageUpcall {
     
+    public static final boolean PRINT_SOLUTION = false;
+    
+    private static final String BROADCAST_PORT = "broadcast_port";
+    private static final String SEQ_NUM = "seq_num";
+    
+    private static final boolean DEBUG = false;
+    
+    
     /**
      * Port type used to broadcast result
      */
@@ -48,10 +56,6 @@ public class Rubiks implements MessageUpcall {
 
     private int currentBound;
 
-    public static final boolean PRINT_SOLUTION = false;
-    
-    private static final String BROADCAST_PORT = "broadcast_port";
-    private static final String SEQ_NUM = "seq_num";
 
     
     /**
@@ -194,7 +198,8 @@ public class Rubiks implements MessageUpcall {
         int numRoots = numGrandChildren / numNodes;
         int seqNum = new Long(ibis.registry().getSequenceNumber(SEQ_NUM)).intValue();
         
-        System.out.println("[" + ibis.identifier() + "] My seqNum: " + seqNum + ". numRoots: " + numRoots);
+        
+        debug("[" + ibis.identifier() + "] My seqNum: " + seqNum + ". numRoots: " + numRoots);
         
         Cube[] cubes = new Cube[numRoots];
         System.arraycopy(grandChildren, seqNum * numRoots, cubes, 0, numRoots);
@@ -222,7 +227,7 @@ public class Rubiks implements MessageUpcall {
                 numSolutions = solve(cube);
                 
                 if(numSolutions > 0){
-                    System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
+                    debug("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
                     
                     int numTwists = currentBound;
                     if(!isMaster){
@@ -247,9 +252,9 @@ public class Rubiks implements MessageUpcall {
     }
     
     private void broadcastResult(int numSolutions, int numTwists) throws IOException {
-        System.out.println("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numTwists);
+        debug("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numTwists);
         if(getPoolSize() <= 1){
-            System.out.println("[" + ibis.identifier() + "] Only one node. Not broadcasting");
+            debug("[" + ibis.identifier() + "] Only one node. Not broadcasting");
             return;
         }
         
@@ -263,7 +268,7 @@ public class Rubiks implements MessageUpcall {
             }
         }
         
-        System.out.println("[" + ibis.identifier() + "] Broadcasting to " + (joinedIbises.length-1) + " nodes");
+        debug("[" + ibis.identifier() + "] Broadcasting to " + (joinedIbises.length-1) + " nodes");
         
         try {
             WriteMessage message = sendPort.newMessage();
@@ -349,7 +354,7 @@ public class Rubiks implements MessageUpcall {
 
     @Override
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
-        System.out.println("Received new result msg");
+        debug("Received new result msg");
         int numSolutions = msg.readInt();
         int numTwists = msg.readInt();
         msg.finish();
@@ -364,16 +369,16 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(numTwists < bestResult){
-            System.out.println("[" + ibis.identifier() + "] Result is better than mine");
+            debug("[" + ibis.identifier() + "] Result is better than mine");
             bestResult = numTwists;
             numBestSolutions = numSolutions;
             
             if(currentBound >= bestResult){
-                System.out.println("[" + ibis.identifier() + "] My bound is larger or equal to the best result");
+                debug("[" + ibis.identifier() + "] My bound is larger or equal to the best result");
                 shouldStopWorking = true; 
                 
                 if(!isMaster){
-                    System.out.println("[" + ibis.identifier() + "] Not a master, terminating");
+                    debug("[" + ibis.identifier() + "] Not a master, terminating");
                     // slave simply terminates at this point
                     terminate();
                 } else {
@@ -386,7 +391,7 @@ public class Rubiks implements MessageUpcall {
     }
     
     private synchronized void computeResults(){
-//        System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
+//        debug("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
         // master is in charge of printing final result
         
         // wait until all other processes have terminated
@@ -418,6 +423,10 @@ public class Rubiks implements MessageUpcall {
         }
         
         System.exit(1);
+    }
+    
+    private void debug(String str){
+        if(DEBUG) System.out.println(str);
     }
     
 }
