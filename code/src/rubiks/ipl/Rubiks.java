@@ -200,20 +200,22 @@ public class Rubiks implements MessageUpcall {
         System.arraycopy(grandChildren, seqNum * numRoots, cubes, 0, numRoots);
         // at this point cubes[] contains all the sub roots of the tree this node will work with
         
+        for(Cube cube : cubes){
+            if(cube.getBound() == 0){
+                // we did two twists (one to generate children, one for grand children),
+                // so set bound accordingly
+                cube.setBound(2);
+            }
+        }
+        
         int numSolutions;
         
         while(!shouldStopWorking){
-            if(isMaster && cube.getBound() >= 2){
-                System.out.print(" " + (cube.getBound()+1));
+            if(isMaster){
+                System.out.print(" " + (cubes[0].getBound()+1));
             }
             
             for(Cube cube : cubes){
-                if(cube.getBound() == 0){
-                    // we did two twists (one to generate children, one for grand children),
-                    // so set bound accordingly
-                    cube.setBound(2);
-                }
-                
                 cube.setBound(cube.getBound()+1);
                 currentBound = cube.getBound();
                 
@@ -222,7 +224,7 @@ public class Rubiks implements MessageUpcall {
                 if(numSolutions > 0){
                     System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
                     
-                    int numTwists = cube.getTwists();
+                    int numTwists = currentBound;
                     if(!isMaster){
                         broadcastResult(numSolutions, numTwists);
                     }
