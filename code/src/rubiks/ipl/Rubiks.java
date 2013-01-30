@@ -381,7 +381,7 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private void computeResults(){
+    private synchronized void computeResults(){
         System.out.println("[" + ibis.identifier() + "] I'm the master. Waiting for slaves to terminate");
         // master is in charge of printing final result
         
