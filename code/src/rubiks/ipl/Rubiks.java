@@ -167,8 +167,6 @@ public class Rubiks implements MessageUpcall {
             start = System.currentTimeMillis();
         }
         
-        int numNodes = getNumNodes();
-    
         if(isMaster){
             System.out.print(" 1");
         }
@@ -188,6 +186,8 @@ public class Rubiks implements MessageUpcall {
             numGrandChildren += children.length;
         }
         
+        
+        int numNodes = getNumNodes();
         
         // calculate the number of roots each node will handle
         int numRoots = numGrandChildren / numNodes;
