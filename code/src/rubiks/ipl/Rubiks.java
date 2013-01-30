@@ -222,8 +222,10 @@ public class Rubiks implements MessageUpcall {
                 if(numSolutions > 0){
                     System.out.println("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
                     
-                    int numSteps = cube.getBound();
-                    broadcastResult(numSolutions, numSteps);
+                    int numTwists = cube.getTwists();
+                    if(!isMaster){
+                        broadcastResult(numSolutions, numTwists);
+                    }
                     
                     shouldStopWorking = true;
                 }
@@ -242,8 +244,8 @@ public class Rubiks implements MessageUpcall {
         return ibis.registry().getPoolSize();
     }
     
-    private void broadcastResult(int numSolutions, int numSteps) throws IOException {
-        System.out.println("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numSteps);
+    private void broadcastResult(int numSolutions, int numTwists) throws IOException {
+        System.out.println("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numTwists);
         if(getPoolSize() <= 1){
             System.out.println("[" + ibis.identifier() + "] Only one node. Not broadcasting");
             return;
@@ -264,7 +266,7 @@ public class Rubiks implements MessageUpcall {
         try {
             WriteMessage message = sendPort.newMessage();
             message.writeInt(numSolutions);
-            message.writeInt(numSteps);
+            message.writeInt(numTwists);
             message.finish();
         } catch (IOException e) {
             // Nothing to do. Some node left the pool.
@@ -347,21 +349,21 @@ public class Rubiks implements MessageUpcall {
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
         System.out.println("Received new result msg");
         int numSolutions = msg.readInt();
-        int numSteps = msg.readInt();
+        int numTwists = msg.readInt();
         msg.finish();
-        handleResultMsg(numSolutions, numSteps);
+        handleResultMsg(numSolutions, numTwists);
     }
     
-    public synchronized void handleResultMsg(int numSolutions, int numSteps) throws IOException{
+    public synchronized void handleResultMsg(int numSolutions, int numTwists) throws IOException{
         if(cube == null){
             // it is possible that the cube is not initialized yet
             terminate();
             return;
         }
         
-        if(numSteps < bestResult){
+        if(numTwists < bestResult){
             System.out.println("[" + ibis.identifier() + "] Result is better than mine");
-            bestResult = numSteps;
+            bestResult = numTwists;
             numBestSolutions = numSolutions;
             
             if(currentBound >= bestResult){
