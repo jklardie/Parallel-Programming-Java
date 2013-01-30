@@ -46,6 +46,8 @@ public class Rubiks implements MessageUpcall {
     private long start;
 
     private int currentBound;
+
+    private int numNodes = -1;
     
     public static final boolean PRINT_SOLUTION = false;
     
@@ -238,9 +240,13 @@ public class Rubiks implements MessageUpcall {
     }
     
     private int getNumNodes(){
-        IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
-        System.out.println("[" + ibis.identifier() + "] num nodes: " + joinedIbises.length);
-        return joinedIbises.length;
+        if(numNodes  == -1){
+            IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
+            System.out.println("[" + ibis.identifier() + "] num nodes: " + joinedIbises.length);
+            numNodes = joinedIbises.length;
+        }
+        
+        return numNodes;
     }
     
     private void broadcastResult(int numSolutions, int numSteps) throws IOException {
