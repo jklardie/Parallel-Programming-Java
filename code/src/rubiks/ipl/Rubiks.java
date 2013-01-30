@@ -208,7 +208,6 @@ public class Rubiks implements MessageUpcall {
             
             for(Cube cube : cubes){
                 if(cube.getBound() == 0){
-                    System.out.println("[" + ibis.identifier() + "] Bound is 0, setting it to 2 (did two twists already)");
                     // we did two twists (one to generate children, one for grand children),
                     // so set bound accordingly
                     cube.setBound(2);
