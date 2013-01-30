@@ -226,12 +226,14 @@ public class Rubiks implements MessageUpcall {
                 
                 numSolutions = solve(cube);
                 
-                if(numSolutions > 0){
+                if(numSolutions > 0 && currentBound < bestResult){
                     debug("[" + ibis.identifier() + "] Num solutions: " + numSolutions);
                     
-                    int numTwists = currentBound;
+                    bestResult = currentBound;
+                    numBestSolutions = numSolutions;
+                    
                     if(!isMaster){
-                        broadcastResult(numSolutions, numTwists);
+                        broadcastResult(numSolutions, currentBound);
                     }
                     
                     shouldStopWorking = true;
