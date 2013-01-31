@@ -254,7 +254,7 @@ public class Rubiks implements MessageUpcall {
                 // only request extra work if prev call succeeded
                 cubes = requestWork(master);
                 
-                if(cubes == null){
+                if(cubes == null || cubes.length == 0){
                     // did not receive extra work. Continue with current cubes, increasing their bounds
                     
                     reqMoreWork = false;
@@ -353,7 +353,7 @@ public class Rubiks implements MessageUpcall {
             return workQueue.pop();
         } catch (NoSuchElementException e){
             // list is empty
-            return null;
+            return new Cube[0];
         }
         
     }
