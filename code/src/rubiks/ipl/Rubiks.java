@@ -258,6 +258,11 @@ public class Rubiks implements MessageUpcall {
                     // did not receive extra work. Continue with current cubes, increasing their bounds
                     
                     reqMoreWork = false;
+                    
+                    if(allCubes == null){
+                        break;
+                    }
+                    
                     allCubes.toArray(cubes);
                 }
             }
