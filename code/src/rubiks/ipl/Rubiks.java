@@ -289,9 +289,7 @@ public class Rubiks implements MessageUpcall {
                     bestResult = currentBound;
                     numBestSolutions = numSolutions;
                     
-                    if(!isMaster){
-                        broadcastResult(numSolutions, currentBound);
-                    }
+                    broadcastResult(numSolutions, currentBound);
                     
                     shouldStopWorking = true;
                     break;
