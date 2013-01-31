@@ -39,7 +39,7 @@ public class Rubiks implements MessageUpcall {
     private static final int CUBES_PER_REQ = 9; // each worker solves 9 subroots of the tree
     
     private boolean queueReady = false;
-    private final Object queueLock = new Object();
+    private Object queueLock;
     
     
     /**
@@ -184,6 +184,8 @@ public class Rubiks implements MessageUpcall {
     }
     
     public void createWorkQueue(int size, int twists, int seed, String fileName) throws IOException{
+        queueLock = new Object();
+        
         cube = initCube(size, twists, seed, fileName);
 
         // create port to receive work requests
