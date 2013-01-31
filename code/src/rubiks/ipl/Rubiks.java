@@ -294,6 +294,7 @@ public class Rubiks implements MessageUpcall {
                     }
                     
                     shouldStopWorking = true;
+                    break;
                 }
                 
                 if(reqMoreWork){
@@ -555,15 +556,16 @@ public class Rubiks implements MessageUpcall {
 //        debug("I'm the master. Waiting for slaves to terminate");
         // master is in charge of printing final result
         
-        // wait until all other processes have terminated
-        ibis.registry().waitUntilTerminated();
-        
-        if(receiver != null){
-            try {
+        try {
+            ibis.registry().terminate();
+            ibis.end();
+            
+            if(receiver != null){
                 receiver.close();
-            } catch (IOException e) {
-                // do nothing.
             }
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
         
         long end = System.currentTimeMillis();
@@ -578,7 +580,7 @@ public class Rubiks implements MessageUpcall {
         System.err.println("Solving cube took " + (end - start)
                 + " milliseconds");
         
-        terminate();
+        System.exit(1);
     }
     
     private void terminate(){
