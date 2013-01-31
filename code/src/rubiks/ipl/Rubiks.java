@@ -352,20 +352,16 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private int getPoolSize(){
-        return ibis.registry().getPoolSize();
-    }
-    
     private void broadcastResult(int numSolutions, int numTwists) throws IOException {
         debug("[" + ibis.identifier() + "] Broadcasting result. numSolutions: " + numSolutions + ". numTwists: " + numTwists);
-        if(getPoolSize() <= 1){
+        SendPort sendPort = ibis.createSendPort(broadcastPortType);
+        
+        IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
+        if(joinedIbises.length <= 1){
             debug("[" + ibis.identifier() + "] Only one node. Not broadcasting");
             return;
         }
         
-        SendPort sendPort = ibis.createSendPort(broadcastPortType);
-        
-        IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
         for (IbisIdentifier joinedIbis : joinedIbises) {
             if(!joinedIbis.equals(ibis.identifier())){
                 // broadcast to all joined nodes, except ourselves.
@@ -548,9 +544,7 @@ public class Rubiks implements MessageUpcall {
         // master is in charge of printing final result
         
         // wait until all other processes have terminated
-        if(getPoolSize() > 1){
-            ibis.registry().waitUntilTerminated();
-        }
+        ibis.registry().waitUntilTerminated();
         
         if(receiver != null){
             try {
