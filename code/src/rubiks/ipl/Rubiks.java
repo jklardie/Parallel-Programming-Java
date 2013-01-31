@@ -334,7 +334,7 @@ public class Rubiks implements MessageUpcall {
         
         // Get cube object from msg
         ReadMessage reply = receivePort.receive();
-        Cube[] cubes = null;
+        Cube[] cubes = new Cube[CUBES_PER_REQ];
         try {
             reply.readArray(cubes);
         } catch (ClassNotFoundException e) {
