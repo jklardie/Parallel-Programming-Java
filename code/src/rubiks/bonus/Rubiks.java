@@ -170,11 +170,10 @@ public class Rubiks implements MessageUpcall {
             System.out.print("Bound now:");
             
             start = System.currentTimeMillis();
-        }
-        
-        if(isMaster){
+            
             System.out.print(" 1");
         }
+        
         
         CubeCache cache = new CubeCache(cube.getSize());
         Cube[] children = cube.generateChildren(cache);
