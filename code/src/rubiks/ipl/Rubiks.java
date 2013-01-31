@@ -235,10 +235,8 @@ public class Rubiks implements MessageUpcall {
             }
         }
         
-        synchronized (queueLock) {
-            queueReady = true;
-            queueLock.notifyAll();
-        }
+        queueReady = true;
+        queueLock.notifyAll();
     }
     
     
@@ -503,12 +501,10 @@ public class Rubiks implements MessageUpcall {
         WriteMessage reply = replyPort.newMessage();
 
         // msg received by master. Make sure work queue has been created
-        synchronized (queueLock) {
-            while(!queueReady){
-                try {
-                    queueLock.wait();
-                } catch (InterruptedException e) {
-                }
+        while(!queueReady){
+            try {
+                queueLock.wait();
+            } catch (InterruptedException e) {
             }
         }
         
