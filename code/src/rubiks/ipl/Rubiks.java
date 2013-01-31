@@ -388,6 +388,7 @@ public class Rubiks implements MessageUpcall {
             // one way communication, no receiving port waiting for a reply, so send null
             message.writeObject(null);
             
+            message.writeInt(MSG_TYPE_RESULT);
             message.writeInt(numSolutions);
             message.writeInt(numTwists);
             message.finish();
@@ -474,7 +475,7 @@ public class Rubiks implements MessageUpcall {
 
     @Override
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
-        debug("Received new result msg");
+        debug("Received new msg");
         
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
 
