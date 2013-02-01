@@ -472,7 +472,7 @@ public class Rubiks implements MessageUpcall {
             // does not hijack all the work before the slaves have time to ask for it
             synchronized(this){
                 try {
-                    wait();
+                    wait(500);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
