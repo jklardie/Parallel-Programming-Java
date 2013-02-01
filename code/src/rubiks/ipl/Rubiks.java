@@ -258,14 +258,14 @@ public class Rubiks implements MessageUpcall {
             }
         }
         
-        if(numBestSolutions > 0){
-            computeResults(true);
-            return;
-        }
-        
         synchronized (queueLock){
             queueReady = true;
             queueLock.notifyAll();
+        }
+        
+        if(numBestSolutions > 0){
+            computeResults(true);
+            return;
         }
     }
     
