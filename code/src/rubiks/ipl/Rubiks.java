@@ -225,14 +225,7 @@ public class Rubiks implements MessageUpcall {
                 bestResult = 1;
                 numBestSolutions = 1;
                 
-                // we found the solution really fast. Give slaves time to connect, 
-                // so they can shutdown nicely
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                }
-                
-                computeResults();
+                computeResults(true);
                 return;
             }
             
@@ -266,14 +259,7 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(numBestSolutions > 0){
-            // we found the solution really fast. Give slaves time to connect, 
-            // so they can shutdown nicely
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-            
-            computeResults();
+            computeResults(true);
             return;
         }
         
@@ -351,7 +337,7 @@ public class Rubiks implements MessageUpcall {
             ibis.registry().waitUntilTerminated();
             if(bestResult < Integer.MAX_VALUE){
                 // compute results if we found any
-                computeResults();
+                computeResults(false);
             }
             
         } else {
@@ -613,7 +599,7 @@ public class Rubiks implements MessageUpcall {
                     // slave simply terminates at this point
                     terminate();
                 } else {
-                    computeResults();
+                    computeResults(false);
                 }
             }
             
@@ -621,9 +607,17 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private synchronized void computeResults(){
-//        debug("I'm the master. Waiting for slaves to terminate");
-        // master is in charge of printing final result
+    private synchronized void computeResults(boolean wait){
+        long end = System.currentTimeMillis();
+        
+        if(wait){
+            // we found the solution really fast. Give slaves time to connect, 
+            // so they can shutdown nicely
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+        }
         
         try {
             ibis.registry().terminate();
@@ -637,7 +631,6 @@ public class Rubiks implements MessageUpcall {
             e1.printStackTrace();
         }
         
-        long end = System.currentTimeMillis();
         
         System.out.println();
         System.out.println("Solving cube possible in " + numBestSolutions + " ways of "
