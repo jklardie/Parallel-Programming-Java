@@ -453,10 +453,15 @@ public class Rubiks implements MessageUpcall {
         if(isMaster){
             createWorkQueue(size, twists, seed, fileName);
             
-            try {
-                // Let the master sleep for 0.5 seconds so slaves have time to request work
-                Thread.sleep(500);
-            } catch (InterruptedException e){
+            // master waits until first slave requests work. This way the master
+            // does not hijack all the work before the slaves have time to ask for it
+            synchronized(this){
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
         
@@ -510,6 +515,8 @@ public class Rubiks implements MessageUpcall {
     }
     
     public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
+        notifyAll();
+        
         // create a sendport for the reply
         SendPort replyPort = ibis.createSendPort(replyPortType);
 
