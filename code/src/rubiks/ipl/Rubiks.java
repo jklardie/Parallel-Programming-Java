@@ -41,6 +41,7 @@ public class Rubiks implements MessageUpcall {
     private static final int MSG_TYPE_RESULT    = 1;
     
     private static final int CUBES_PER_REQ = 9; // each worker solves 9 subroots of the tree
+    private static final int INITIAL_BOUND = 5;
     
     private boolean queueReady = false;
     private Object queueLock;
@@ -231,8 +232,10 @@ public class Rubiks implements MessageUpcall {
                 cubes = new Cube[CUBES_PER_REQ];
             }
             
-            // we already did two twists, so set bound accordingly
-            grandChildren[i].setBound(2);
+            // set bound to 5. This way each worker takes some time computing before
+            // requesting more work, giving all workers a fair chance of obtaining work
+            // (even if some might arrive later)
+            grandChildren[i].setBound(INITIAL_BOUND);
             
             cubes[i % CUBES_PER_REQ] = grandChildren[i];
             
@@ -279,6 +282,9 @@ public class Rubiks implements MessageUpcall {
             }
             
             if(isMaster && prevBound < cubes[0].getBound()+1){
+                if(prevBound == 2 && cubes[0].getBound() == INITIAL_BOUND){
+                    System.out.print(" 3 4 5");
+                }
                 System.out.print(" " + (cubes[0].getBound()+1));
                 prevBound = cubes[0].getBound()+1;
             }
