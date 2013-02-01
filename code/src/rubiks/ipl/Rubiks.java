@@ -521,7 +521,7 @@ public class Rubiks implements MessageUpcall {
             new Rubiks().run(args);
         } catch (IbisCreationFailedException e) {
 //            System.err.println("Exception while creating Ibis instance");
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (IOException e) {
 //            System.err.println("IOException while electing a master");
 //            e.printStackTrace();
