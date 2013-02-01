@@ -302,7 +302,8 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(isMaster){
-            computeResults();
+            // wait if we did not find any result
+            computeResults(bestResult == Integer.MAX_VALUE);
         } else {
             terminate();
         }
@@ -549,7 +550,7 @@ public class Rubiks implements MessageUpcall {
                     // slave simply terminates at this point
                     terminate();
                 } else {
-                    computeResults();
+                    computeResults(false);
                 }
             }
             
@@ -557,9 +558,13 @@ public class Rubiks implements MessageUpcall {
         
     }
     
-    private synchronized void computeResults(){
+    private synchronized void computeResults(boolean wait){
 //        debug("I'm the master. Waiting for slaves to terminate");
         // master is in charge of printing final result
+        
+        if(wait){
+            ibis.registry().waitUntilTerminated();
+        }
         
         try {
             ibis.registry().terminate();
