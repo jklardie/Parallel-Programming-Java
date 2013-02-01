@@ -224,6 +224,14 @@ public class Rubiks implements MessageUpcall {
                 // we did one twists. Therefore there can be only one solution
                 bestResult = 1;
                 numBestSolutions = 1;
+                
+                // we found the solution really fast. Give slaves time to connect, 
+                // so they can shutdown nicely
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+                
                 computeResults();
                 return;
             }
@@ -258,6 +266,13 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(numBestSolutions > 0){
+            // we found the solution really fast. Give slaves time to connect, 
+            // so they can shutdown nicely
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+            
             computeResults();
             return;
         }
