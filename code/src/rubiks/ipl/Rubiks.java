@@ -1,11 +1,15 @@
 package rubiks.ipl;
 
+import ibis.ipl.AlreadyConnectedException;
+import ibis.ipl.ConnectionFailedException;
+import ibis.ipl.ConnectionRefusedException;
 import ibis.ipl.Ibis;
 import ibis.ipl.IbisCapabilities;
 import ibis.ipl.IbisCreationFailedException;
 import ibis.ipl.IbisFactory;
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.MessageUpcall;
+import ibis.ipl.PortMismatchException;
 import ibis.ipl.PortType;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
@@ -384,7 +388,18 @@ public class Rubiks implements MessageUpcall {
         for (IbisIdentifier joinedIbis : joinedIbises) {
             if(!joinedIbis.equals(ibis.identifier())){
                 // broadcast to all joined nodes, except ourselves.
-                sendPort.connect(joinedIbis, BROADCAST_PORT);
+                
+                try {
+                    sendPort.connect(joinedIbis, BROADCAST_PORT);
+                } catch (ConnectionRefusedException e){
+                    //  receiver denies the connection. ignore
+                } catch (AlreadyConnectedException e){
+                    // port was already connected to the receiver. ignore
+                } catch (PortMismatchException e){
+                    // receiveport port and the sendport are of different types. will (should) not occur
+                } catch (ConnectionFailedException e){
+                    // something else went wrong. ignore
+                }
             }
         }
         
