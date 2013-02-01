@@ -263,7 +263,7 @@ public class Rubiks implements MessageUpcall {
                     
                     reqMoreWork = false;
                     
-                    if(allCubes == null){
+                    if(allCubes.size() == 0){
                         break;
                     }
                     
