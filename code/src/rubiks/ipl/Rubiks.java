@@ -268,6 +268,8 @@ public class Rubiks implements MessageUpcall {
                     }
                     
                     cubes = allCubes.toArray(new Cube[allCubes.size()]);
+                    
+                    debug("Im working with " + cubes.length + " cubes");
                 }
             }
             
@@ -348,8 +350,6 @@ public class Rubiks implements MessageUpcall {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        debug("Received " + cubes.length + " new cubes to work with");
         
         reply.finish();
         
