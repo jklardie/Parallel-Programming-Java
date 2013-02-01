@@ -80,7 +80,7 @@ public class Rubiks implements MessageUpcall {
     private boolean isMaster;
     private boolean shouldStopWorking;
     private int bestResult = Integer.MAX_VALUE;
-    private int numBestSolutions;
+    private int numBestSolutions = 0;
 
     private long start;
 
@@ -222,14 +222,28 @@ public class Rubiks implements MessageUpcall {
         // get a list of all grand children. 
         int numGrandChildren = 0;
         for(Cube child : children){
+            if(child.isSolved()){
+                // we did one twists. Therefore there can be only one solution
+                bestResult = 1;
+                numBestSolutions = 1;
+                computeResults();
+                return;
+            }
+            
             System.arraycopy(child.generateChildren(cache), 0, grandChildren, numGrandChildren, children.length);
             numGrandChildren += children.length;
         }
         
         Cube[] cubes = null;
+        int numSolutions = 0;
         for(int i=0; i<numGrandChildren; i++){
             if(i % CUBES_PER_REQ == 0){
                 cubes = new Cube[CUBES_PER_REQ];
+            }
+            
+            if(grandChildren[i].isSolved()){
+                bestResult = 2;
+                numBestSolutions++;
             }
             
             // set bound to 5. This way each worker takes some time computing before
@@ -242,6 +256,11 @@ public class Rubiks implements MessageUpcall {
             if(i % CUBES_PER_REQ == CUBES_PER_REQ-1){
                 workQueue.add(cubes);
             }
+        }
+        
+        if(numBestSolutions > 0){
+            computeResults();
+            return;
         }
         
         synchronized (queueLock){
