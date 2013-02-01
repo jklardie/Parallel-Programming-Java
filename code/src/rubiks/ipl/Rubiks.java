@@ -445,6 +445,12 @@ public class Rubiks implements MessageUpcall {
         isMaster = master.equals(ibis.identifier());
         if(isMaster){
             createWorkQueue(size, twists, seed, fileName);
+            
+            try {
+                // Let the master sleep for 0.5 seconds so slaves have time to request work
+                Thread.sleep(500);
+            } catch (InterruptedException e){
+            }
         }
         
         doWork(size, twists, seed, fileName, master);
