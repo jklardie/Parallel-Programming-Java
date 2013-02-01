@@ -343,6 +343,8 @@ public class Rubiks implements MessageUpcall {
             e.printStackTrace();
         }
         
+        debug("Received " + cubes.length + " new cubes to work with");
+        
         reply.finish();
         
         // Close ports.
@@ -474,18 +476,18 @@ public class Rubiks implements MessageUpcall {
 
     @Override
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
-        debug("Received new msg");
-        
         ReceivePortIdentifier requestor = (ReceivePortIdentifier) msg.readObject();
 
         int msgType = msg.readInt();
 
         switch (msgType) {
             case MSG_TYPE_WORK_REQ:
+                debug("Received new work req msg");
                 msg.finish();
                 handleWorkReqMsg(requestor);
                 break;
             case MSG_TYPE_RESULT:
+                debug("Received new result msg");
                 int numSolutions = msg.readInt();
                 int numSteps = msg.readInt();
                 msg.finish();
