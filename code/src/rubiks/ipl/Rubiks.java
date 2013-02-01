@@ -217,8 +217,6 @@ public class Rubiks implements MessageUpcall {
         Cube[] grandChildren = new Cube[children.length * children.length];
         workQueue = new LinkedList<Cube[]>();
         
-        System.out.print(" 2");
-        
         // get a list of all grand children. 
         int numGrandChildren = 0;
         for(Cube child : children){
@@ -234,8 +232,9 @@ public class Rubiks implements MessageUpcall {
             numGrandChildren += children.length;
         }
         
+        System.out.print(" 2");
+        
         Cube[] cubes = null;
-        int numSolutions = 0;
         for(int i=0; i<numGrandChildren; i++){
             if(i % CUBES_PER_REQ == 0){
                 cubes = new Cube[CUBES_PER_REQ];
