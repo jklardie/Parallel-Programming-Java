@@ -519,13 +519,10 @@ public class Rubiks implements MessageUpcall {
     public static void main(String[] args) {
         try {
             new Rubiks().run(args);
-        } catch (IbisCreationFailedException e) {
-//            System.err.println("Exception while creating Ibis instance");
-//            e.printStackTrace();
-        } catch (IOException e) {
-//            System.err.println("IOException while electing a master");
-//            e.printStackTrace();
-        }
+        } catch (Exception e) {
+            // ignore all exceptions (some might arise when the master finds
+            // the result very fast, and slaves try to connect after that.
+        } 
 
     }
 
