@@ -267,8 +267,7 @@ public class Rubiks implements MessageUpcall {
                         break;
                     }
                     
-                    cubes = new Cube[allCubes.size()];
-                    allCubes.toArray(cubes);
+                    cubes = allCubes.toArray(new Cube[allCubes.size()]);
                 }
             }
             
