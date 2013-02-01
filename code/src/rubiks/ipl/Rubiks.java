@@ -263,13 +263,14 @@ public class Rubiks implements MessageUpcall {
                     
                     reqMoreWork = false;
                     
+                    debug("Im working with " + allCubes.size() + " cubes");
+                    
                     if(allCubes.size() == 0){
                         break;
                     }
                     
                     cubes = allCubes.toArray(new Cube[allCubes.size()]);
                     
-                    debug("Im working with " + cubes.length + " cubes");
                 }
             }
             
