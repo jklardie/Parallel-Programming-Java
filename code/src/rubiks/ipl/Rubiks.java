@@ -585,6 +585,7 @@ public class Rubiks implements MessageUpcall{
                     if(allCubes.size() == 0){
                         // we did not receive any work at all, so stop working
                         shouldStopWorking = true;
+                        continue;
                     } else {
                         cubes = allCubes.toArray(new Cube[allCubes.size()]);
                     }
@@ -593,10 +594,8 @@ public class Rubiks implements MessageUpcall{
                 }
             }
             
-            if(cubes.length > 0){
-                log(LogLevel.VERBOSE, "solutions size: " + solutions.size() 
-                        + ". Next bound: " + (cubes[0].getBound()+1), null);
-            }
+            log(LogLevel.VERBOSE, "solutions size: " + solutions.size() 
+                    + ". Next bound: " + (cubes[0].getBound()+1), null);
             
             if(solutions.size() > 0){
                 log(LogLevel.VERBOSE, "Solution twists: " + solutions.get(0).size(), null);
