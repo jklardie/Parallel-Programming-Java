@@ -650,7 +650,9 @@ public class Rubiks implements MessageUpcall {
             ibis.registry().terminate();
             ibis.end();
         } catch (IOException e) {
-            // do nothing. 
+            if(DEBUG){
+                e.printStackTrace();
+            }
         }
         
         System.exit(1);
