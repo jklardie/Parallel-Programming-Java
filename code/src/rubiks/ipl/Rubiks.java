@@ -743,6 +743,14 @@ public class Rubiks implements MessageUpcall{
         
         // TODO: maybe this can be removed?
         if(isMaster){
+            if(numTwists <= 3){
+                // we found the result very fast, so lets give slaves time to connect (and then disconnect)
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+            }
+            
             // the master waits for all slaves to terminate
             ibis.registry().waitUntilTerminated();
             
