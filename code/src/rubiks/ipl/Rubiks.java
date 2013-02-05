@@ -96,6 +96,7 @@ public class Rubiks implements MessageUpcall{
     private boolean printedResult;
     
     private final HashMap<IbisIdentifier, Integer> workers = new HashMap<IbisIdentifier, Integer>();
+    private int numExpectedWorkers;
     
     
     @Override
@@ -391,10 +392,23 @@ public class Rubiks implements MessageUpcall{
         // maintain a list of unique workers, and the amount of work they have
         if(!workers.containsKey(worker)){
             workers.put(worker, 0);
+            
+            int numWorkers = workers.size();
+            if(numWorkers > 8){
+                numExpectedWorkers = 16;
+            } else if(numWorkers > 4){
+                numExpectedWorkers = 8;
+            } else if(numWorkers > 2){
+                numExpectedWorkers = 4;
+            } else if(numWorkers > 1){
+                numExpectedWorkers = 2;
+            } else {
+                numExpectedWorkers = 1;
+            }
         }
         
         // try to evenly divide the number of work
-        int numAllowedChunks = numWorkChunks / workers.size();
+        int numAllowedChunks = numWorkChunks / numExpectedWorkers;
         log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker) + ". Num workers: " + workers.size(), null);
         if(workers.get(worker) >= numAllowedChunks){
             return new Cube[0];
