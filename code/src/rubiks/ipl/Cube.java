@@ -152,7 +152,9 @@ public class Cube implements Serializable {
         this.size = original.size;
         this.numTwists = original.numTwists;
         this.bound = original.bound;
-        this.twists = original.twists;
+        
+        this.twists = new ArrayList<Twist>();
+        for(Twist twist : original.twists) this.twists.add(twist);
 
         // init data arrays
         data = new byte[SIDES][size * size];
@@ -223,7 +225,9 @@ public class Cube implements Serializable {
         target.size = size;
         target.numTwists = numTwists;
         target.bound = bound;
-        target.twists = twists;
+        
+        target.twists = new ArrayList<Twist>();
+        for(Twist twist : twists) target.twists.add(twist);
 
         // init state.
         for (byte i = 0; i < SIDES; i++) {
