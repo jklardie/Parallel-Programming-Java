@@ -381,6 +381,8 @@ public class Rubiks implements MessageUpcall{
     private Cube[] getWorkCubes(){
         synchronized(workQueue){
             if(printedResult){
+                // we printed the result already, so no more work to do
+                log(LogLevel.VERBOSE, "Already printed result, not returning any work anymore", null);
                 return new Cube[0];
             }
             
@@ -554,6 +556,7 @@ public class Rubiks implements MessageUpcall{
             if(requestMoreWork){
                 try {
                     cubes = requestWork(master);
+                    log(LogLevel.VERBOSE, "Received " + cubes.length + " cubes..", null);
                 } catch (IOException e){
                     log(LogLevel.ERROR, "Failed getting work", e);
                     return;
@@ -574,7 +577,7 @@ public class Rubiks implements MessageUpcall{
                 }
             }
             
-            // let print current bound
+            // let master print current bound
             if(isMaster && (cubes[0].getBound()+1 > prevBound)){
                 System.out.print(" " + (cubes[0].getBound()+1));
                 prevBound = (cubes[0].getBound()+1);
