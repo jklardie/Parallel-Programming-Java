@@ -492,7 +492,7 @@ public class Rubiks implements MessageUpcall {
             // master waits until first slave requests work. This way the master
             // does not hijack all the work before the slaves have time to ask for it
             try {
-                Thread.sleep(100);
+                Thread.sleep(250);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
