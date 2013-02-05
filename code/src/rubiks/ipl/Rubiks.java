@@ -19,6 +19,7 @@ import ibis.ipl.WriteMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
@@ -85,6 +86,7 @@ public class Rubiks implements MessageUpcall{
     private long startMs;
 
     private LinkedList<Cube[]> workQueue;
+    private int numWorkChunks;
 
     private int numSolutions = 0;
     private int numTwists = Integer.MAX_VALUE;
@@ -92,10 +94,8 @@ public class Rubiks implements MessageUpcall{
 
     private boolean shouldStopWorking = false;
     private boolean printedResult;
-
-
-
     
+    private final HashMap<IbisIdentifier, Integer> workers = new HashMap<IbisIdentifier, Integer>();
     
     
     @Override
@@ -348,6 +348,8 @@ public class Rubiks implements MessageUpcall{
             printResult(numSolutions, numTwists);
         } 
         
+        numWorkChunks = workQueue.size();
+        
         // some slaves might have been waiting until the queue is ready.
         // Wake those workers up!
         synchronized (queueReadyLock){
@@ -403,7 +405,20 @@ public class Rubiks implements MessageUpcall{
         
     }
     
-    private Cube[] requestWork(IbisIdentifier master) throws IOException{
+    private Cube[] requestWork(IbisIdentifier master, IbisIdentifier worker) throws IOException{
+        // maintain a list of unique workers, and the amount of work they have
+        if(!workers.containsKey(worker)){
+            workers.put(worker, 0);
+        }
+        
+        // try to evenly divide the number of work
+        int numAllowedChunks = numWorkChunks / workers.size();
+        if(workers.get(worker) >= numAllowedChunks){
+            return new Cube[0];
+        }
+        
+        workers.put(worker, workers.get(worker));
+        
         if(isMaster){
             // the master holds the queue, so does not need to perform network communication
             return getWorkCubes();
@@ -562,7 +577,7 @@ public class Rubiks implements MessageUpcall{
             // obtain cubes to work with
             if(requestMoreWork){
                 try {
-                    cubes = requestWork(master);
+                    cubes = requestWork(master, ibis.identifier());
                     log(LogLevel.VERBOSE, "Received " + cubes.length + " cubes..", null);
                 } catch (IOException e){
                     log(LogLevel.ERROR, "Failed getting work", e);
