@@ -79,8 +79,6 @@ public class Rubiks implements MessageUpcall{
     
     private boolean isMaster;
     
-    private final Object firstSlaveLock = new Object();
-    
     private final Object queueReadyLock = new Object();
     private boolean queueReady = false;
 
@@ -147,11 +145,6 @@ public class Rubiks implements MessageUpcall{
                     log(LogLevel.WARN, "Waiting for queue ready was interrupted", e);
                 }
             }
-        }
-        
-        // notify master which might be waiting for the first slave
-        synchronized(firstSlaveLock){
-            firstSlaveLock.notifyAll();
         }
         
         Cube[] cubes = getWorkCubes();
@@ -727,20 +720,11 @@ public class Rubiks implements MessageUpcall{
             }
             
             if(numTwists == Integer.MAX_VALUE){
-                log(LogLevel.VERBOSE, "Found no result yet, so wait for first slave to connect", null);
-                
-                // the master waits until the first slave asks for work. 
-                // Otherwise, the master is way too fast, and does all the work.
-                // The master waits 500ms max, and only if we did not find a result yet. 
-                synchronized(firstSlaveLock){
-                    try {
-                        firstSlaveLock.wait(500);
-                    } catch (InterruptedException e) {
-                        // ignore
-                    }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    // ignore
                 }
-                
-                log(LogLevel.VERBOSE, "First slave connected, or waited 500ms", null);
             }
             
         }
