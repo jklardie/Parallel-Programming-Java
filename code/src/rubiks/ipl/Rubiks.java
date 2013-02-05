@@ -395,7 +395,6 @@ public class Rubiks implements MessageUpcall{
         
         // try to evenly divide the number of work
         int numAllowedChunks = numWorkChunks / workers.size();
-        log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker) + ". Num workers: " + workers.size(), null);
         if(workers.get(worker) >= numAllowedChunks){
             return new Cube[0];
         }
@@ -736,7 +735,7 @@ public class Rubiks implements MessageUpcall{
             
             if(numTwists == Integer.MAX_VALUE){
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     // ignore
                 }
