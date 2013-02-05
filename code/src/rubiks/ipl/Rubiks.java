@@ -585,29 +585,29 @@ public class Rubiks implements MessageUpcall{
                 prevBound = (cubes[0].getBound()+1);
             }
             
+            if(solutions.size() > 0 && cubes[0].getBound()+1 > solutions.get(0).size()){
+                numTwists = solutions.get(0).size();
+                numSolutions = solutions.size();
+                this.solutions = solutions;
+                
+                // we found the solutions, and have no twists within this bound to explore
+                // so we broadcast the solutions, and stop working
+                try {
+                    broadcastSolutions(solutions);
+                } catch (IOException e) {
+                    log(LogLevel.ERROR, "Failed broadcasting solutions", e);
+                }
+                
+                return;
+            } else if(this.solutions != null && this.solutions.size() > 0 && cubes[0].getBound()+1 > numTwists){
+                // we received a result that is better than our result, so stop working
+                return;
+            }
+            
             // find solutions
             for(Cube cube : cubes){
                 // increase bound on cube
                 currentBound = cube.getBound()+1;
-                
-                if(solutions.size() > 0 && currentBound > solutions.get(0).size()){
-                    numTwists = solutions.get(0).size();
-                    numSolutions = solutions.size();
-                    this.solutions = solutions;
-                    
-                    // we found the solutions, and have no twists within this bound to explore
-                    // so we broadcast the solutions, and stop working
-                    try {
-                        broadcastSolutions(solutions);
-                    } catch (IOException e) {
-                        log(LogLevel.ERROR, "Failed broadcasting solutions", e);
-                    }
-                    
-                    return;
-                } else if(this.solutions != null && this.solutions.size() > 0 && currentBound > numTwists){
-                    // we received a result that is better than our result, so stop working
-                    return;
-                }
                 
                 cube.setBound(currentBound);
                 
