@@ -628,6 +628,10 @@ public class Rubiks implements MessageUpcall{
             
             // find solutions
             for(Cube cube : cubes){
+                if(shouldStopWorking){
+                    break;
+                }
+                
                 // increase bound on cube
                 currentBound = cube.getBound()+1;
                 
