@@ -709,12 +709,12 @@ public class Cube implements Serializable {
     public static class Twist implements Serializable {
         private static final long serialVersionUID = -5781804980570998969L;
         
-        Axis axis;
+        int axis;
         int row;
         boolean direction;
         
         public Twist(Axis axis, int row, boolean direction) {
-            this.axis = axis;
+            this.axis = axis.ordinal();
             this.row = row;
             this.direction = direction;
         }
