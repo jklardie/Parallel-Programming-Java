@@ -607,8 +607,13 @@ public class Rubiks implements MessageUpcall {
         
         if(wait){
             // we found the solution really fast. Give slaves time to connect, 
-            // so they can shutdown nicely
+            // so they can shutdown nicely. Also, make sure no slaves deadlock
             try {
+                synchronized (queueLock){
+                    queueReady = true;
+                    queueLock.notifyAll();
+                }
+                
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
