@@ -588,6 +588,10 @@ public class Rubiks implements MessageUpcall{
             log(LogLevel.VERBOSE, "solutions size: " + solutions.size() 
                     + ". Next bound: " + (cubes[0].getBound()+1), null);
             
+            if(solutions.size() > 0){
+                log(LogLevel.VERBOSE, "Solution twists: " + solutions.get(0).size(), null);
+            }
+            
             if(solutions.size() > 0 && cubes[0].getBound()+1 > solutions.get(0).size()){
                 numTwists = solutions.get(0).size();
                 numSolutions = solutions.size();
