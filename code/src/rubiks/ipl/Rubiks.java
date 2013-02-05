@@ -147,6 +147,7 @@ public class Rubiks implements MessageUpcall{
         }
         
         Cube[] cubes = getWorkCubes();
+        log(LogLevel.VERBOSE, "Number of cubes to be sent to slave: " + cubes.length, null);
         reply.writeArray(cubes);
         reply.finish();
 
