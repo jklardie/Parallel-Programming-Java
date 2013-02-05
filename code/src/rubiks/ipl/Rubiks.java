@@ -549,7 +549,7 @@ public class Rubiks implements MessageUpcall {
         }
     }
     
-    public synchronized void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
+    public void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
         notifyAll();
         
         // create a sendport for the reply
