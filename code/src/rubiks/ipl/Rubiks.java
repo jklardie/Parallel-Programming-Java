@@ -639,18 +639,12 @@ public class Rubiks implements MessageUpcall{
                 
                 ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
                 
-                if(tmpSolutions.size() > 0){
-                    log(LogLevel.VERBOSE, "Found " + tmpSolutions.size() + " tmp solutions. Twists: " + tmpSolutions.get(0).size(), null);
-                }
-                
                 // add all solutions we found so far to the solutions list
                 for(ArrayList<Twist> solution : tmpSolutions){
                     if(!solutions.contains(solution)){
                         solutions.add(solution);
                     }
                 }
-                
-                log(LogLevel.DEBUG, "Num solutions after " + currentBound + ": " + solutions.size(), null);
                 
             }
         }
