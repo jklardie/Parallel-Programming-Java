@@ -219,7 +219,7 @@ public class Rubiks implements MessageUpcall {
         int numGrandChildren = 0;
         for(Cube child : children){
             if(child.isSolved()){
-                // we did one twists. Therefore there can be only one solution
+                // we did one twist. Therefore there can be only one solution
                 bestResult = 1;
                 numBestSolutions = 1;
                 
@@ -386,12 +386,14 @@ public class Rubiks implements MessageUpcall {
         return cubes;
     }
     
-    private synchronized Cube[] getWorkCubes(){
-        try {
-            return workQueue.pop();
-        } catch (NoSuchElementException e){
-            // list is empty
-            return new Cube[0];
+    private Cube[] getWorkCubes(){
+        synchronized(workQueue){
+            try {
+                return workQueue.pop();
+            } catch (NoSuchElementException e){
+                // list is empty
+                return new Cube[0];
+            }
         }
         
     }
