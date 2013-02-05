@@ -387,42 +387,40 @@ public class Rubiks implements MessageUpcall{
         createWorkQueue(cube);
     }
     
-    private Cube[] getWorkCubes(IbisIdentifier worker){
-        synchronized(workQueue){
-            // maintain a list of unique workers, and the amount of work they have
-            if(!workers.containsKey(worker)){
-                workers.put(worker, 0);
-            }
-            
-            // try to evenly divide the number of work
-            int numAllowedChunks = numWorkChunks / workers.size();
-            log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker) + ". Num workers: " + workers.size(), null);
-            if(workers.get(worker) >= numAllowedChunks){
-                return new Cube[0];
-            }
-            
-            workers.put(worker, workers.get(worker)+1);
-            
-            if(printedResult){
-                // we printed the result already, so no more work to do
-                log(LogLevel.VERBOSE, "Already printed result, not returning any work anymore", null);
-                return new Cube[0];
-            }
-            
-            try {
-                return workQueue.pop();
-            } catch (NoSuchElementException e){
-                // list is empty
-                return new Cube[0];
-            }
+    private synchronized Cube[] getWorkCubes(IbisIdentifier worker){
+        // maintain a list of unique workers, and the amount of work they have
+        if(!workers.containsKey(worker)){
+            workers.put(worker, 0);
+        }
+        
+        // try to evenly divide the number of work
+        int numAllowedChunks = numWorkChunks / workers.size();
+        log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker) + ". Num workers: " + workers.size(), null);
+        if(workers.get(worker) >= numAllowedChunks){
+            return new Cube[0];
+        }
+        
+        workers.put(worker, workers.get(worker)+1);
+        
+        if(printedResult){
+            // we printed the result already, so no more work to do
+            log(LogLevel.VERBOSE, "Already printed result, not returning any work anymore", null);
+            return new Cube[0];
+        }
+        
+        try {
+            return workQueue.pop();
+        } catch (NoSuchElementException e){
+            // list is empty
+            return new Cube[0];
         }
         
     }
     
-    private Cube[] requestWork(IbisIdentifier master, IbisIdentifier worker) throws IOException{
+    private Cube[] requestWork(IbisIdentifier master) throws IOException{
         if(isMaster){
             // the master holds the queue, so does not need to perform network communication
-            return getWorkCubes(master);
+            return getWorkCubes(ibis.identifier());
         } 
         
         // Create a send port for sending the request and connect.
@@ -440,7 +438,7 @@ public class Rubiks implements MessageUpcall{
         WriteMessage request = sendPort.newMessage();
         request.writeObject(receivePort.identifier());
         request.writeInt(MSG_TYPE_WORK_REQ);
-        request.writeObject(worker);
+        request.writeObject(ibis.identifier());
         request.finish();
         
         // Get cube object from msg
@@ -579,7 +577,7 @@ public class Rubiks implements MessageUpcall{
             // obtain cubes to work with
             if(requestMoreWork){
                 try {
-                    cubes = requestWork(master, ibis.identifier());
+                    cubes = requestWork(master);
                     log(LogLevel.VERBOSE, "Received " + cubes.length + " cubes..", null);
                 } catch (IOException e){
                     log(LogLevel.ERROR, "Failed getting work", e);
