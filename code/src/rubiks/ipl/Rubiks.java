@@ -492,7 +492,7 @@ public class Rubiks implements MessageUpcall {
             // master waits until first slave requests work. This way the master
             // does not hijack all the work before the slaves have time to ask for it
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -585,20 +585,17 @@ public class Rubiks implements MessageUpcall {
             bestResult = numTwists;
             numBestSolutions = numSolutions;
             
-            if(currentBound >= bestResult){
-                debug("My bound is larger or equal to the best result");
-                shouldStopWorking = true; 
-                
-                if(!isMaster){
-                    debug("Not a master, terminating");
-                    // slave simply terminates at this point
-                    terminate();
-                } else {
-                    computeResults(false);
-                }
-            }
+            shouldStopWorking = true; 
             
+            if(!isMaster){
+                debug("Not a master, terminating");
+                // slave simply terminates at this point
+                terminate();
+            } else {
+                computeResults(false);
+            }
         }
+            
         
     }
     
