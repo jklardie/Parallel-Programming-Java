@@ -44,7 +44,7 @@ public class Rubiks implements MessageUpcall {
     private static final int INITIAL_BOUND = 5;
     
     private boolean queueReady = false;
-    private Object queueLock;
+    private final Object queueLock = new Object();
     
     
     /**
@@ -189,8 +189,6 @@ public class Rubiks implements MessageUpcall {
     }
     
     public void createWorkQueue(int size, int twists, int seed, String fileName) throws IOException{
-        queueLock = new Object();
-        
         cube = initCube(size, twists, seed, fileName);
 
         // create port to receive work requests
@@ -558,6 +556,7 @@ public class Rubiks implements MessageUpcall {
         WriteMessage reply = replyPort.newMessage();
 
         // msg received by master. Make sure work queue has been created
+        
         synchronized (queueLock){
             while(!queueReady){
                 try {
