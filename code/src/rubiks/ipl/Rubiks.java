@@ -213,7 +213,7 @@ public class Rubiks implements MessageUpcall{
      * @param e
      */
     private void log(LogLevel level, String msg, Exception e){
-        if(level.ordinal() > LOG_LEVEL.ordinal()){
+        if(level.ordinal() < LOG_LEVEL.ordinal()){
             return;
         }
         
