@@ -693,6 +693,7 @@ public class Rubiks implements MessageUpcall{
             return;
         } catch (IbisConfigurationException e){
             // this might happen when the master finds a result really fast
+            return;
         }
         
         // create broadcast receiver used by all nodes
