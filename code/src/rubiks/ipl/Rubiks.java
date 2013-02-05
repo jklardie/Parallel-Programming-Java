@@ -281,7 +281,7 @@ public class Rubiks implements MessageUpcall{
         CubeCache cache = new CubeCache(initialCube.getSize());
         
         // create children (1 twist from initial cube)
-        System.out.println(" 1");
+        System.out.print(" 1");
         log(LogLevel.DEBUG, "Generating children (1 twist from orig)", null);
         Cube[] children = initialCube.generateChildren(cache);
         
