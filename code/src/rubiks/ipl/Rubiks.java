@@ -109,6 +109,7 @@ public class Rubiks implements MessageUpcall{
             case MSG_TYPE_WORK_REQ:
                 log(LogLevel.DEBUG, "Received new work req msg", null);
                 msg.finish();
+                log(LogLevel.VERBOSE, "Msg finished", null);
                 handleWorkReqMsg(requestor);
                 break;
             case MSG_TYPE_RESULT:
@@ -124,11 +125,17 @@ public class Rubiks implements MessageUpcall{
         // create a sendport for the reply
         SendPort replyPort = ibis.createSendPort(REPLY_PORT_TYPE);
 
+        log(LogLevel.VERBOSE, "Created send port", null);
+        
         // connect to the requestor's receive port
         replyPort.connect(requestor);
+        
+        log(LogLevel.VERBOSE, "Connected requestor", null);
 
         // create a reply message
         WriteMessage reply = replyPort.newMessage();
+        
+        log(LogLevel.VERBOSE, "Created WriteMessage", null);
 
         // msg received by master. Make sure work queue has been created
         synchronized (queueReadyLock){
@@ -298,6 +305,12 @@ public class Rubiks implements MessageUpcall{
                 
                 printResult(numSolutions, numTwists);
                 
+                // make sure no slaves are blocked
+                synchronized (queueReadyLock){
+                    queueReady = true;
+                    queueReadyLock.notifyAll();
+                }
+                
                 return;
             }
             
@@ -339,15 +352,14 @@ public class Rubiks implements MessageUpcall{
         if(numTwists == 2){
             // we found a solution already!
             printResult(numSolutions, numTwists);
-        } else {
-            // some slaves might have been waiting until the queue is ready.
-            // Wake those workers up!
-            synchronized (queueReadyLock){
-                queueReady = true;
-                queueReadyLock.notifyAll();
-            }
-        }
+        } 
         
+        // some slaves might have been waiting until the queue is ready.
+        // Wake those workers up!
+        synchronized (queueReadyLock){
+            queueReady = true;
+            queueReadyLock.notifyAll();
+        }
     }
 
     /**
