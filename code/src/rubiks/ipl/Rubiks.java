@@ -418,7 +418,7 @@ public class Rubiks implements MessageUpcall{
             return new Cube[0];
         }
         
-        workers.put(worker, workers.get(worker));
+        workers.put(worker, workers.get(worker)+1);
         
         if(isMaster){
             // the master holds the queue, so does not need to perform network communication
