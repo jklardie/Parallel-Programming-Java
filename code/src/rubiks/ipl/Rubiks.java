@@ -324,7 +324,10 @@ public class Rubiks implements MessageUpcall {
         }
         
         if(isMaster){
-            ibis.registry().waitUntilTerminated();
+            if(ibis.registry().joinedIbises().length > 1){
+                ibis.registry().waitUntilTerminated();
+            }
+            
             if(bestResult < Integer.MAX_VALUE){
                 // compute results if we found any
                 computeResults(false);
