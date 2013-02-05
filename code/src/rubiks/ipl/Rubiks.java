@@ -88,6 +88,7 @@ public class Rubiks implements MessageUpcall {
 
     private LinkedList<Cube[]> workQueue; // work queue: array of 9 cubes to be solved
     private ReceivePort receiver;
+    private final Object slavesMonitor = new Object(); // monitor used to let master wait for slaves
 
     
     /**
@@ -493,9 +494,9 @@ public class Rubiks implements MessageUpcall {
             
             // master waits until first slave requests work. This way the master
             // does not hijack all the work before the slaves have time to ask for it
-            synchronized(this){
+            synchronized(slavesMonitor){
                 try {
-                    wait(500);
+                    slavesMonitor.wait(500);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -550,7 +551,9 @@ public class Rubiks implements MessageUpcall {
     }
     
     public void handleWorkReqMsg(ReceivePortIdentifier requestor) throws IOException{
-        notifyAll();
+        synchronized(slavesMonitor ){
+            slavesMonitor.notifyAll();
+        }
         
         // create a sendport for the reply
         SendPort replyPort = ibis.createSendPort(replyPortType);
