@@ -274,7 +274,7 @@ public class Rubiks implements MessageUpcall {
         Cube[] cubes = null;
         boolean reqMoreWork = true;
         
-        prevBound = 2;
+        int prevBound = 2;
         
         while(!shouldStopWorking){
             if(reqMoreWork){
