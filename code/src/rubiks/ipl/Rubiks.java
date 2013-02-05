@@ -593,12 +593,6 @@ public class Rubiks implements MessageUpcall{
                 }
             }
             
-            // let master print current bound
-            if(isMaster && (cubes[0].getBound()+1 > lastPrintedBound)){
-                System.out.print(" " + (cubes[0].getBound()+1));
-                lastPrintedBound = (cubes[0].getBound()+1);
-            }
-            
             if(cubes.length > 0){
                 log(LogLevel.VERBOSE, "solutions size: " + solutions.size() 
                         + ". Next bound: " + (cubes[0].getBound()+1), null);
@@ -625,6 +619,12 @@ public class Rubiks implements MessageUpcall{
             } else if(this.solutions != null && this.solutions.size() > 0 && cubes[0].getBound()+1 > numTwists){
                 // we received a result that is better than our result, so stop working
                 return;
+            }
+            
+            // let master print current bound
+            if(isMaster && (cubes[0].getBound()+1 > lastPrintedBound)){
+                System.out.print(" " + (cubes[0].getBound()+1));
+                lastPrintedBound = (cubes[0].getBound()+1);
             }
             
             // find solutions
