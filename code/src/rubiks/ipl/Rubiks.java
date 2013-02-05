@@ -620,6 +620,8 @@ public class Rubiks implements MessageUpcall{
                     }
                 }
                 
+                log(LogLevel.DEBUG, "Num solutions after " + currentBound + ": " + solutions.size(), null);
+                
             }
         }
     }
