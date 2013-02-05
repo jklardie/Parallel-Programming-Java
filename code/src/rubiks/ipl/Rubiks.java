@@ -4,6 +4,7 @@ import rubiks.ipl.Cube.Twist;
 import ibis.ipl.ConnectionFailedException;
 import ibis.ipl.Ibis;
 import ibis.ipl.IbisCapabilities;
+import ibis.ipl.IbisConfigurationException;
 import ibis.ipl.IbisCreationFailedException;
 import ibis.ipl.IbisFactory;
 import ibis.ipl.IbisIdentifier;
@@ -690,6 +691,8 @@ public class Rubiks implements MessageUpcall{
         } catch (IbisCreationFailedException e) {
             log(LogLevel.ERROR, "Creating ibis instance failed", e);
             return;
+        } catch (IbisConfigurationException e){
+            // this might happen when the master finds a result really fast
         }
         
         // create broadcast receiver used by all nodes
