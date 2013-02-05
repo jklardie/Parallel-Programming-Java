@@ -396,7 +396,7 @@ public class Rubiks implements MessageUpcall{
             
             // try to evenly divide the number of work
             int numAllowedChunks = numWorkChunks / workers.size();
-            log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker), null);
+            log(LogLevel.VERBOSE, "numAllowedChunks: " + numAllowedChunks + ". current num chunks: " + workers.get(worker) + ". Num workers: " + workers.size(), null);
             if(workers.get(worker) >= numAllowedChunks){
                 return new Cube[0];
             }
@@ -422,7 +422,7 @@ public class Rubiks implements MessageUpcall{
     private Cube[] requestWork(IbisIdentifier master, IbisIdentifier worker) throws IOException{
         if(isMaster){
             // the master holds the queue, so does not need to perform network communication
-            return getWorkCubes(worker);
+            return getWorkCubes(master);
         } 
         
         // Create a send port for sending the request and connect.
