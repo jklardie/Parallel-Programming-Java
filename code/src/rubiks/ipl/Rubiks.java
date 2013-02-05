@@ -620,12 +620,16 @@ public class Rubiks implements MessageUpcall{
                 
                 ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
                 
+                log(LogLevel.VERBOSE, "Found " + tmpSolutions.size() + " tmp solutions", null);
+                
                 // add all solutions we found so far to the solutions list
                 for(ArrayList<Twist> solution : tmpSolutions){
                     if(!solutions.contains(solution)){
                         solutions.add(solution);
                     }
                 }
+                
+                log(LogLevel.VERBOSE, "Found " + tmpSolutions.size() + " tmp solutions", null);
                 
                 log(LogLevel.DEBUG, "Num solutions after " + currentBound + ": " + solutions.size(), null);
                 
