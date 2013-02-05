@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -66,9 +67,11 @@ public class Cube implements Serializable {
      */
     private final byte[][] data;
 
-    private int twists; // number of twists this cube is a result of
+    private int numTwists; // number of twists this cube is a result of
 
     private int bound; // bound, useful for limiting the search depth
+    
+    private ArrayList<Twist> twists;  // twists done to get to this cube
 
     /**
      * Creates a "solved" cube of a given size
@@ -82,8 +85,9 @@ public class Cube implements Serializable {
         // init data arrays
         data = new byte[SIDES][size * size];
 
-        twists = 0;
+        numTwists = 0;
         bound = 0;
+        twists = new ArrayList<Twist>();
 
         // init state. side 0 should be white, side 1 is yellow, etc.
         for (byte side = 0; side < SIDES; side++) {
@@ -130,7 +134,8 @@ public class Cube implements Serializable {
         }
 
         // set twists back to 0
-        this.twists = 0;
+        this.numTwists = 0;
+        this.twists = new ArrayList<Twist>();
 
         // just in case
         checkIfConsistent();
@@ -145,8 +150,9 @@ public class Cube implements Serializable {
      */
     public Cube(Cube original) {
         this.size = original.size;
-        this.twists = original.twists;
+        this.numTwists = original.numTwists;
         this.bound = original.bound;
+        this.twists = original.twists;
 
         // init data arrays
         data = new byte[SIDES][size * size];
@@ -215,8 +221,9 @@ public class Cube implements Serializable {
      */
     public void copyTo(Cube target) {
         target.size = size;
-        target.twists = twists;
+        target.numTwists = numTwists;
         target.bound = bound;
+        target.twists = twists;
 
         // init state.
         for (byte i = 0; i < SIDES; i++) {
@@ -238,8 +245,8 @@ public class Cube implements Serializable {
      * 
      * @return the number of twists
      */
-    public int getTwists() {
-        return twists;
+    public int getNumTwists() {
+        return numTwists;
     }
 
     /**
@@ -346,6 +353,9 @@ public class Cube implements Serializable {
             // should not happen, but you never know :)
             throw new Error("unknown axis in twist");
         }
+        
+        result.addTwist(axis, row, direction);
+        
         return result;
     }
 
@@ -487,7 +497,7 @@ public class Cube implements Serializable {
         rotate(BOTTOM, direction);
 
         // record this twist
-        twists++;
+        numTwists++;
     }
 
     /**
@@ -530,7 +540,7 @@ public class Cube implements Serializable {
         rotate(RIGHT, direction);
 
         // record this twist
-        twists++;
+        numTwists++;
 
     }
 
@@ -583,7 +593,7 @@ public class Cube implements Serializable {
         rotate(BACK, !direction);
 
         // record this twist
-        twists++;
+        numTwists++;
     }
 
     /**
@@ -663,5 +673,56 @@ public class Cube implements Serializable {
             throw new Error("unknown color: " + color);
         }
 
+    }
+    
+    private void addTwist(Axis axis, int row, boolean direction){
+        twists.add(new Twist(axis, row, direction));
+    }
+    
+    public ArrayList<Twist> getTwists(){
+        return twists;
+    }
+    
+    /**
+     * Return whether or not this cube had the same twists as the other cube
+     * @param other
+     * @return
+     */
+    public boolean sameTwists(Cube other){
+        if(other.twists.size() != twists.size()){
+            return false;
+        }
+        
+        for(int i=0; i<twists.size(); i++){
+            if(!twists.get(i).equals(other.twists.get(i))){
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public class Twist implements Serializable {
+        private static final long serialVersionUID = -5781804980570998969L;
+        
+        Axis axis;
+        int row;
+        boolean direction;
+        
+        public Twist(Axis axis, int row, boolean direction) {
+            this.axis = axis;
+            this.row = row;
+            this.direction = direction;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if(!(obj instanceof Twist)){
+                return false;
+            }
+            
+            Twist other = (Twist)obj;
+            return other.axis == axis && other.row == row && other.direction == direction;
+        }
     }
 }
