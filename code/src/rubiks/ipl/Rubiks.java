@@ -274,6 +274,8 @@ public class Rubiks implements MessageUpcall {
         Cube[] cubes = null;
         boolean reqMoreWork = true;
         
+        prevBound = 2;
+        
         while(!shouldStopWorking){
             if(reqMoreWork){
                 // only request extra work if prev call succeeded
@@ -294,8 +296,9 @@ public class Rubiks implements MessageUpcall {
                 }
             }
             
-            if(isMaster){
+            if(isMaster && (cubes[0].getBound()+1) > prevBound){
                 System.out.print(" " + (cubes[0].getBound()+1));
+                prevBound = (cubes[0].getBound()+1);
             }
             
             for(Cube cube : cubes){
