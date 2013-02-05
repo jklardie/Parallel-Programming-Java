@@ -574,6 +574,8 @@ public class Rubiks implements MessageUpcall{
                     } else {
                         cubes = allCubes.toArray(new Cube[allCubes.size()]);
                     }
+                } else {
+                    allCubes.addAll(Arrays.asList(cubes));
                 }
             }
             
