@@ -604,7 +604,7 @@ public class Rubiks implements MessageUpcall{
                     }
                     
                     return;
-                } else if(this.solutions.size() > 0 && currentBound > numTwists){
+                } else if(this.solutions != null && this.solutions.size() > 0 && currentBound > numTwists){
                     // we received a result that is better than our result, so stop working
                     return;
                 }
