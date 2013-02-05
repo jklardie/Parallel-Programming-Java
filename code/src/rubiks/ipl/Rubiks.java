@@ -677,6 +677,11 @@ public class Rubiks implements MessageUpcall{
             return;
         }
         
+        try {
+            log(LogLevel.DEBUG, "Seq num: " + ibis.registry().getSequenceNumber("seq"), null);
+        } catch (IOException e1) {
+        }
+        
         // create broadcast receiver used by all nodes
         ReceivePort broadcastReceiver = null;
         try {
@@ -734,15 +739,6 @@ public class Rubiks implements MessageUpcall{
             work(master);
         } 
 
-        if(isMaster && numTwists <= 3){
-            // we found the result very fast, so lets give slaves time to connect (and then disconnect)
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-        }
-        
-        
         // done working, so terminate our ibis instance
         try {
             ibis.registry().terminate();
