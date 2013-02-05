@@ -706,15 +706,15 @@ public class Cube implements Serializable {
         return true;
     }
     
-    public class Twist implements Serializable {
+    public static class Twist implements Serializable {
         private static final long serialVersionUID = -5781804980570998969L;
         
-        int axis;   // Inner class can not have automatic serialization of enums, so use int
+        Axis axis;
         int row;
         boolean direction;
         
         public Twist(Axis axis, int row, boolean direction) {
-            this.axis = axis.ordinal();
+            this.axis = axis;
             this.row = row;
             this.direction = direction;
         }
