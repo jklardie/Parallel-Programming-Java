@@ -549,7 +549,7 @@ public class Rubiks implements MessageUpcall{
         Cube[] cubes = null;
         boolean requestMoreWork = true;
         
-        int prevBound = 2, currentBound;
+        int lastPrintedBound = 2, currentBound;
         
         while(!shouldStopWorking){
             // obtain cubes to work with
@@ -580,10 +580,13 @@ public class Rubiks implements MessageUpcall{
             }
             
             // let master print current bound
-            if(isMaster && (cubes[0].getBound()+1 > prevBound)){
+            if(isMaster && (cubes[0].getBound()+1 > lastPrintedBound)){
                 System.out.print(" " + (cubes[0].getBound()+1));
-                prevBound = (cubes[0].getBound()+1);
+                lastPrintedBound = (cubes[0].getBound()+1);
             }
+            
+            log(LogLevel.VERBOSE, "solutions size: " + solutions.size() 
+                    + ". Next bound: " + (cubes[0].getBound()+1), null);
             
             if(solutions.size() > 0 && cubes[0].getBound()+1 > solutions.get(0).size()){
                 numTwists = solutions.get(0).size();
