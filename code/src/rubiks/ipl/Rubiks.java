@@ -74,6 +74,11 @@ public class Rubiks implements MessageUpcall{
      * Number of cubes a worker gets when it asks for work
      */
     private static final int CUBES_PER_WORK_REQ = 9;
+    
+    /**
+     * Initial bound workers will start with
+     */
+    private static final int INITIAL_BOUND = 5;
 
     private Ibis ibis;
     private ReceivePort workReqReceiver;
@@ -97,6 +102,7 @@ public class Rubiks implements MessageUpcall{
     
     private final HashMap<IbisIdentifier, Integer> workers = new HashMap<IbisIdentifier, Integer>();
     private int numExpectedWorkers;
+    private int lastPrintedBound;
     
     
     @Override
@@ -334,7 +340,9 @@ public class Rubiks implements MessageUpcall{
                 numSolutions++;
             }
 
-            cube.setBound(2);
+            // set the initial bound to 5, so workers don't ask for work again
+            // too fast. This way all workers have a good chance of getting work.
+            cube.setBound(INITIAL_BOUND);
             
             cubes[i % CUBES_PER_WORK_REQ] = cube;
             
@@ -572,6 +580,12 @@ public class Rubiks implements MessageUpcall{
      * @return unique solutions, or an empty ArrayList
      */
     private ArrayList<ArrayList<Twist>> solve(Cube cube){
+        // let master print current bound
+        if(isMaster && (cube.getBound() > lastPrintedBound)){
+            System.out.print(" " + (cube.getBound()));
+            lastPrintedBound = (cube.getBound());
+        }
+        
         // cache used for cube objects. Doing new Cube() for every move
         // overloads the garbage collector
         CubeCache cache = new CubeCache(cube.getSize());
@@ -584,8 +598,6 @@ public class Rubiks implements MessageUpcall{
         ArrayList<Cube> allCubes = new ArrayList<Cube>();
         Cube[] cubes = null;
         boolean requestMoreWork = true;
-        
-        int lastPrintedBound = 2, currentBound;
         
         while(!shouldStopWorking){
             // obtain cubes to work with
@@ -642,12 +654,6 @@ public class Rubiks implements MessageUpcall{
                 return;
             }
             
-            // let master print current bound
-            if(isMaster && (cubes[0].getBound()+1 > lastPrintedBound)){
-                System.out.print(" " + (cubes[0].getBound()+1));
-                lastPrintedBound = (cubes[0].getBound()+1);
-            }
-            
             // find solutions
             for(Cube cube : cubes){
                 if(shouldStopWorking){
@@ -655,9 +661,7 @@ public class Rubiks implements MessageUpcall{
                 }
                 
                 // increase bound on cube
-                currentBound = cube.getBound()+1;
-                
-                cube.setBound(currentBound);
+                cube.setBound(cube.getBound()+1);
                 
                 ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
                 
