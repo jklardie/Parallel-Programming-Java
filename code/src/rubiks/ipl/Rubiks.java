@@ -29,10 +29,11 @@ public class Rubiks implements MessageUpcall{
         VERBOSE,        // all info
         DEBUG,          // info useful for debugging
         WARN,           // non critical errors 
-        ERROR           // critical errors only
+        ERROR,           // critical errors only
+        NONE
     }
     
-    private static final LogLevel LOG_LEVEL     = LogLevel.ERROR;
+    private static final LogLevel LOG_LEVEL     = LogLevel.NONE;
     private static final boolean PRINT_SOLUTION = false;
     
     private static final int MSG_TYPE_WORK_REQ  = 0;
