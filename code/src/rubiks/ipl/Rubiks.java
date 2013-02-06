@@ -582,8 +582,8 @@ public class Rubiks implements MessageUpcall{
     private ArrayList<ArrayList<Twist>> solve(Cube cube){
         // let master print current bound
         if(isMaster && (cube.getBound() > lastPrintedBound)){
-            System.out.print(" " + (cube.getBound()));
-            lastPrintedBound = (cube.getBound());
+            System.out.print(" " + (cube.getTwists().size()));
+            lastPrintedBound = (cube.getTwists().size());
         }
         
         // cache used for cube objects. Doing new Cube() for every move
