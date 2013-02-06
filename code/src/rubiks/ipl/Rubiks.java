@@ -543,6 +543,12 @@ public class Rubiks implements MessageUpcall{
             return null;
         }
 
+        // let master print current bound
+        if(isMaster && (cube.getNumTwists() > lastPrintedBound)){
+            System.out.print(" " + (cube.getNumTwists()+1));
+            lastPrintedBound = (cube.getNumTwists()+1);
+        }
+        
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
@@ -580,12 +586,6 @@ public class Rubiks implements MessageUpcall{
      * @return unique solutions, or an empty ArrayList
      */
     private ArrayList<ArrayList<Twist>> solve(Cube cube){
-        // let master print current bound
-        if(isMaster && (cube.getTwists().size() > lastPrintedBound)){
-            System.out.print(" " + (cube.getTwists().size()));
-            lastPrintedBound = (cube.getTwists().size());
-        }
-        
         // cache used for cube objects. Doing new Cube() for every move
         // overloads the garbage collector
         CubeCache cache = new CubeCache(cube.getSize());
