@@ -760,7 +760,7 @@ public class Rubiks implements MessageUpcall{
             work(master);
         } 
 
-        if(isMaster && runtimeMs < 1000){
+        if(isMaster && printedResult && runtimeMs < 1000){
             // found the solution within 1000ms, so give workers another second to connect
             // and realize we finished.
             try {
