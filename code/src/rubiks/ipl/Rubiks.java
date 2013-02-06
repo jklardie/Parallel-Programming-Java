@@ -29,7 +29,7 @@ public class Rubiks implements MessageUpcall{
         VERBOSE,        // all info
         DEBUG,          // info useful for debugging
         WARN,           // non critical errors 
-        ERROR,           // critical errors only
+        ERROR,          // critical errors only
         NONE
     }
     
@@ -768,14 +768,6 @@ public class Rubiks implements MessageUpcall{
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
-        }
-        
-        
-        // done working, so terminate our ibis instance
-        try {
-            ibis.registry().terminate();
-        } catch (IOException e) {
-            log(LogLevel.WARN, "Terminate ibis registry failed", e);
         }
         
         // TODO: maybe this can be removed?
