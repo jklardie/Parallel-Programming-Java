@@ -103,6 +103,7 @@ public class Rubiks implements MessageUpcall{
     private final HashMap<IbisIdentifier, Integer> workers = new HashMap<IbisIdentifier, Integer>();
     private int numExpectedWorkers;
     private int lastPrintedBound;
+    private long runtimeMs;
     
     
     @Override
@@ -267,7 +268,7 @@ public class Rubiks implements MessageUpcall{
     private void printResult(int numSolutions, int numTwists){
         printedResult = true;
         
-        long runtimeMs = System.currentTimeMillis() - startMs;
+        runtimeMs = System.currentTimeMillis() - startMs;
         
         System.out.println();
         System.out.println("Solving cube possible in " + numSolutions + " ways of "
@@ -759,8 +760,9 @@ public class Rubiks implements MessageUpcall{
             work(master);
         } 
 
-        if(isMaster && numTwists <= 3){
-            // we found the result very fast, so lets give slaves time to connect (and then disconnect)
+        if(isMaster && printedResult && runtimeMs < 1000){
+            // found the solution within 1000ms, so give workers another second to connect
+            // and realize we finished.
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
