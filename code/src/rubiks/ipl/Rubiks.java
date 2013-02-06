@@ -581,7 +581,7 @@ public class Rubiks implements MessageUpcall{
      */
     private ArrayList<ArrayList<Twist>> solve(Cube cube){
         // let master print current bound
-        if(isMaster && (cube.getBound() > lastPrintedBound)){
+        if(isMaster && (cube.getTwists().size() > lastPrintedBound)){
             System.out.print(" " + (cube.getTwists().size()));
             lastPrintedBound = (cube.getTwists().size());
         }
