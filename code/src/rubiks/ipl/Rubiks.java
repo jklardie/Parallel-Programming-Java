@@ -544,7 +544,7 @@ public class Rubiks implements MessageUpcall{
         }
 
         // let master print current bound
-        if(isMaster && (cube.getNumTwists() > lastPrintedBound)){
+        if(isMaster && (cube.getNumTwists()+1 > lastPrintedBound)){
             System.out.print(" " + (cube.getNumTwists()+1));
             lastPrintedBound = (cube.getNumTwists()+1);
         }
@@ -750,14 +750,6 @@ public class Rubiks implements MessageUpcall{
             } catch (Exception e){
                 log(LogLevel.ERROR, e.getMessage(), e);
                 return;
-            }
-            
-            if(numTwists == Integer.MAX_VALUE){
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
             }
             
         }
