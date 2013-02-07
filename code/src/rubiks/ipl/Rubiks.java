@@ -780,7 +780,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 // found the solution within 1000ms, so give workers another second to connect
                 // and realize we finished.
                 try {
-                    Thread.sleep(1000);
+                    log(LogLevel.VERBOSE, "Found the result very fast, so sleep 2s", null);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                 }
             }
