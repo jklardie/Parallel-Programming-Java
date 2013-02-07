@@ -110,6 +110,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     private final Object waitForIbisLock = new Object();
     
     private final ArrayList<IbisIdentifier> joinedIbises = new ArrayList<IbisIdentifier>();
+    private int lastFoundResult = Integer.MAX_VALUE;
     
     
     @Override
@@ -549,7 +550,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         
         if (cube.isSolved()) {
             // return the solution for this cube
-            solutions.add(new ArrayList<Twist>(cube.getTwists()));
+            solutions.add(cube.getTwists());
             return solutions;
         }
 
@@ -563,6 +564,10 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             lastPrintedBound = (cube.getNumTwists()+1);
         }
         
+        if(cube.getNumTwists()+1 > lastFoundResult){
+            return null;
+        }
+        
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
@@ -573,7 +578,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             if(childSolutions != null){
                 for(ArrayList<Twist> solution : childSolutions){
                     if(!solutions.contains(solution)){
-                        solutions.add(new ArrayList<Twist>(solution));
+                        lastFoundResult  = solution.size();
+                        solutions.add(solution);
                     }
                 }
                 
@@ -670,7 +676,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             }
             
             if(!requestMoreWork && mySolutions.size() > 0 
-                    && cubes[0].getNumTwists() >= mySolutions.get(0).size()
+                    && cubes[0].getNumTwists()+1 > mySolutions.get(0).size()
                     && mySolutions.get(0).size() <= numTwists){
                 numTwists = mySolutions.get(0).size();
                 numSolutions = mySolutions.size();
