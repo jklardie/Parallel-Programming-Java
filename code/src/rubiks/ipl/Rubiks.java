@@ -405,6 +405,9 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         System.out.flush();
         System.out.print("Bound now:");
         
+        // sleep 1 second so all workers have time to connect
+        Thread.sleep(1000);
+        
         startMs = System.currentTimeMillis();
         
         createWorkQueue(cube);
