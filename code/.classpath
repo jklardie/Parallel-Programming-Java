@@ -14,7 +14,7 @@
 	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-compile-2.3.jar"/>
 	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-io-2.3.jar"/>
 	<classpathentry kind="lib" path="ipl-2.3/lib/ibis-util-2.3.jar"/>
-	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-2.3.jar"/>
+	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-2.3.jar" sourcepath="ipl-2.3/sources/ipl-2.3-sources.zip"/>
 	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-2.3.jar"/>
 	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-dummy-2.3.jar"/>
 	<classpathentry kind="lib" path="ipl-2.3/lib/ipl-impl-lrmc-2.3.jar"/>
