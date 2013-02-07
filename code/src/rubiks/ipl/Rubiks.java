@@ -69,8 +69,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
      */
     private static final IbisCapabilities IBIS_CAPABILITIES = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
-            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
-            IbisCapabilities.TERMINATION);
+            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED);
 
     /**
      * Number of cubes a worker gets when it asks for work
@@ -107,7 +106,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     private int lastPrintedBound;
     private long runtimeMs;
     
-    private final Object numSlavesLock = new Object();;
+    private final Object numWorkersLock = new Object();
+    private final Object waitForIbisLock = new Object();
     
     private final ArrayList<IbisIdentifier> joinedIbises = new ArrayList<IbisIdentifier>();
     
@@ -493,11 +493,12 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         log(LogLevel.DEBUG, "Broadcasting solutions. numb solutions: " + solutions.size() 
                 + ". Num twists: " + solutions.get(0).size(), null);
         
-        SendPort sendPort = ibis.createSendPort(BROADCAST_PORT_TYPE);
         if(joinedIbises.size() <= 1){
             log(LogLevel.VERBOSE, "Only one node. Not broadcasting", null);
             return;
         }
+        
+        SendPort sendPort = ibis.createSendPort(BROADCAST_PORT_TYPE);
         
         for (IbisIdentifier joinedIbis : joinedIbises) {
             if(!joinedIbis.equals(ibis.identifier())){
@@ -766,20 +767,25 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             work(master);
         } 
 
-        if(isMaster && printedResult && runtimeMs < 1000){
-            // found the solution within 1000ms, so give workers another second to connect
-            // and realize we finished.
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-        }
-        
-        
         if(isMaster){
-            // the master waits for all slaves to terminate
-            ibis.registry().waitUntilTerminated();
+            if(printedResult && runtimeMs < 1000){
+                // found the solution within 1000ms, so give workers another second to connect
+                // and realize we finished.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+            }
             
+            synchronized(waitForIbisLock){
+                while(joinedIbises.size() > 1){
+                    try {
+                        waitForIbisLock.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        
             if(!printedResult){
                 printResult(numSolutions, numTwists);
             }
@@ -800,17 +806,28 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
 
     @Override
     public void joined(IbisIdentifier joinedIbis) {
-        synchronized (numSlavesLock) {
+        synchronized (numWorkersLock) {
             joinedIbises.add(joinedIbis);
-            log(LogLevel.DEBUG, "New worker. Total: " + joinedIbises.size(), null);
+            
+            if(isMaster) log(LogLevel.DEBUG, "New worker. Total: " + joinedIbises.size(), null);
         }
     }
 
     @Override
     public void left(IbisIdentifier leftIbis) {
-        synchronized (numSlavesLock) {
+        synchronized (numWorkersLock) {
             joinedIbises.remove(leftIbis);
-            log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
+            
+            if(isMaster && joinedIbises.size() == 1){
+                log(LogLevel.DEBUG, "Last worker left, waking up", null);
+                
+                // last worker to leave, so notify master
+                synchronized (waitForIbisLock) {
+                    waitForIbisLock.notifyAll();
+                }
+            }
+            
+            if(isMaster) log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
         }
     }
 
