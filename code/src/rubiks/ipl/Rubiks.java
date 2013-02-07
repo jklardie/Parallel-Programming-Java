@@ -716,6 +716,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         // create ibis instance 
         try {
             ibis = IbisFactory.createIbis(IBIS_CAPABILITIES, this, WORK_REQ_PORT_TYPE, REPLY_PORT_TYPE, BROADCAST_PORT_TYPE);
+            ibis.registry().enableEvents();
             log(LogLevel.VERBOSE, "Created ibis instance", null);
         } catch (IbisCreationFailedException e) {
             log(LogLevel.ERROR, "Creating ibis instance failed", e);
@@ -813,6 +814,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         
         synchronized (numSlavesLock) {
             numSlaves--;
+            log(LogLevel.DEBUG, "Worker left. Total: " + numSlaves, null);
         }
     }
 
