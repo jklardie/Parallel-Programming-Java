@@ -662,6 +662,16 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 }
             }
             
+            if(mySolutions.size() > 0){
+                log(LogLevel.DEBUG, 
+                        "myNumSolutions: " + mySolutions.size() +
+                        "mySolution.numTwists: " + mySolutions.get(0).size() + 
+                        "requestMoreWork?: " + requestMoreWork + 
+                        "cubes[0].getNumTwists(): " + cubes[0].getNumTwists() +
+                        "numTwists received solution: " + numTwists, 
+                        null);
+            }
+            
             if(!requestMoreWork && mySolutions.size() > 0 
                     && cubes[0].getNumTwists() >= mySolutions.get(0).size()
                     && mySolutions.get(0).size() <= numTwists){
