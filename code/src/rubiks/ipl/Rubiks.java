@@ -79,7 +79,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     /**
      * Initial bound workers will start with
      */
-    private static final int INITIAL_BOUND = 5;
+    private static final int INITIAL_BOUND = 2;
 
     private Ibis ibis;
     private ReceivePort workReqReceiver;
@@ -110,7 +110,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     private final Object waitForIbisLock = new Object();
     
     private final ArrayList<IbisIdentifier> joinedIbises = new ArrayList<IbisIdentifier>();
-    private int lastFoundResult = Integer.MAX_VALUE;
     
     
     @Override
@@ -550,7 +549,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         
         if (cube.isSolved()) {
             // return the solution for this cube
-            log(LogLevel.VERBOSE, "Cube solved. getNumTwists(): " + cube.getNumTwists() + ". getTwists().size(): " + cube.getTwists().size(), null);
             solutions.add(cube.getTwists());
             return solutions;
         }
@@ -565,10 +563,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             lastPrintedBound = (cube.getNumTwists()+1);
         }
         
-        if(cube.getNumTwists()+1 > lastFoundResult){
-            return null;
-        }
-        
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
@@ -579,7 +573,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             if(childSolutions != null){
                 for(ArrayList<Twist> solution : childSolutions){
                     if(!solutions.contains(solution)){
-                        lastFoundResult  = solution.size();
                         solutions.add(solution);
                     }
                 }
