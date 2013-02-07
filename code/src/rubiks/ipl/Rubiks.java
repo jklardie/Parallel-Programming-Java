@@ -554,6 +554,12 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         if (cube.getNumTwists() >= cube.getBound()) {
             return null;
         }
+        
+        if(shouldStopWorking || cube.getTwists().size() >= numTwists){
+            log(LogLevel.VERBOSE, "Should stop working, or by bound is higher than result. Stopping", null);
+            shouldStopWorking = true;
+            return null;
+        }
 
         // let master print current bound
         if(isMaster && (cube.getNumTwists()+1 > lastPrintedBound)){
