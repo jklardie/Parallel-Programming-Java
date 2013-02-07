@@ -765,6 +765,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         if(numTwists == Integer.MAX_VALUE){
             // only execute work if we did not find a result yet
             work(master);
+            log(LogLevel.VERBOSE, "Stopped working. Found solution: " + printedResult + ". ShouldStopWorking: " + shouldStopWorking, null);
         } 
 
         if(isMaster){
@@ -818,6 +819,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         synchronized (numWorkersLock) {
             joinedIbises.remove(leftIbis);
             
+            if(isMaster) log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
+            
             if(isMaster && joinedIbises.size() == 1){
                 log(LogLevel.DEBUG, "Last worker left, waking up", null);
                 
@@ -826,8 +829,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                     waitForIbisLock.notifyAll();
                 }
             }
-            
-            if(isMaster) log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
         }
     }
 
