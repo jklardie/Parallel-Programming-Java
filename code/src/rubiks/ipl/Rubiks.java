@@ -544,7 +544,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
      * @param cache
      * @return ArrayList of unique solutions
      */
-    private ArrayList<ArrayList<Twist>> solutions(Cube cube, CubeCache cache){
+    private ArrayList<ArrayList<Twist>> solutions(Cube cube, CubeCache cache, int bestSolution){
         ArrayList<ArrayList<Twist>> solutions = new ArrayList<ArrayList<Twist>>();
         
         if (cube.isSolved()) {
@@ -553,12 +553,9 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             return solutions;
         }
 
-        if (cube.getNumTwists() >= cube.getBound()) {
+        if (cube.getNumTwists() >= cube.getBound() || cube.getNumTwists() >= bestSolution) {
             return null;
-        } else if(cube.getNumTwists() >= numTwists || shouldStopWorking){
-            shouldStopWorking = true;
-            return null;
-        }
+        } 
         
         // let master print current bound
         if(isMaster && (cube.getNumTwists()+1 > lastPrintedBound)){
@@ -570,14 +567,14 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
 
+        int currentBestSolution = (solutions.size() > 0) ? solutions.get(0).size() : Integer.MAX_VALUE;
         for (Cube child : children) {
             // recursion step
-            ArrayList<ArrayList<Twist>> childSolutions = solutions(child, cache);
+            ArrayList<ArrayList<Twist>> childSolutions = solutions(child, cache, currentBestSolution);
             if(childSolutions != null){
                 for(ArrayList<Twist> solution : childSolutions){
                     if(!solutions.contains(solution)){
                         solutions.add(solution);
-                        numTwists = solution.size();
                     }
                 }
                 
@@ -607,7 +604,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         // cache used for cube objects. Doing new Cube() for every move
         // overloads the garbage collector
         CubeCache cache = new CubeCache(cube.getSize());
-        return solutions(cube, cache);
+        return solutions(cube, cache, numTwists);
     }
     
     private void work(IbisIdentifier master){
