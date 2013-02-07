@@ -636,30 +636,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 }
             }
             
-            // let master print current bound
-            if(isMaster && cubes[0].getBound()+1 > lastPrintedBound){
-                System.out.print(" " + (cubes[0].getBound()+1));
-                lastPrintedBound = cubes[0].getBound()+1;
-            }
-            
-            
-            // find solutions
-            for(Cube cube : cubes){
-                // increase bound on cube
-                cube.setBound(cube.getBound()+1);
-                
-                ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
-                
-                if(tmpSolutions != null){
-                    // add all solutions we found so far to the solutions list
-                    for(ArrayList<Twist> solution : tmpSolutions){
-                        if(!mySolutions.contains(solution)){
-                            mySolutions.add(solution);
-                        }
-                    }
-                }
-            }
-            
             if(mySolutions.size() > 0){
                 log(LogLevel.DEBUG, 
                         "\n\tmyNumSolutions: " + mySolutions.size() +
@@ -690,6 +666,31 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 // we received a result that is better than our result, so stop working
                 return;
             }
+            
+            // let master print current bound
+            if(isMaster && cubes[0].getBound()+1 > lastPrintedBound){
+                System.out.print(" " + (cubes[0].getBound()+1));
+                lastPrintedBound = cubes[0].getBound()+1;
+            }
+            
+            
+            // find solutions
+            for(Cube cube : cubes){
+                // increase bound on cube
+                cube.setBound(cube.getBound()+1);
+                
+                ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
+                
+                if(tmpSolutions != null){
+                    // add all solutions we found so far to the solutions list
+                    for(ArrayList<Twist> solution : tmpSolutions){
+                        if(!mySolutions.contains(solution)){
+                            mySolutions.add(solution);
+                        }
+                    }
+                }
+            }
+            
         }
     }
 
