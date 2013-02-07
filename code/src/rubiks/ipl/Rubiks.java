@@ -174,6 +174,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         int numTwists = solutions.get(0).size();
         
         if(numTwists < this.numTwists){
+            log(LogLevel.VERBOSE, "Result is better than mine, so replace it, and stop working", null);
+            
             // the received result is better than our result, so replace it
             this.solutions = solutions;
             this.numSolutions = numSolutions;
@@ -181,6 +183,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             shouldStopWorking = true;
         } else if(numTwists == this.numTwists){
+            log(LogLevel.VERBOSE, "Result is equal to mine, add new solutions", null);
+            
             // the received result is the same as our result, so we might find new solutions
             for(ArrayList<Twist> solution : solutions){
                 if(!this.solutions.contains(solution)){
@@ -190,6 +194,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             numSolutions = this.solutions.size();
         } else {
+            log(LogLevel.VERBOSE, "Result is worse than mine, so ignore", null);
             // ignore, our result is better
         }
     }
@@ -663,7 +668,9 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             // find solutions
             for(Cube cube : cubes){
-                if(shouldStopWorking){
+                if(shouldStopWorking || cube.getBound() >= numTwists){
+                    log(LogLevel.VERBOSE, "Should stop working, or by bound is higher than result. Stopping", null);
+                    shouldStopWorking = true;
                     break;
                 }
                 
