@@ -544,16 +544,16 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
      * @param cache
      * @return ArrayList of unique solutions
      */
-    private ArrayList<ArrayList<Twist>> solutions(Cube cube, CubeCache cache, int bestSolution){
+    private ArrayList<ArrayList<Twist>> solutions(Cube cube, CubeCache cache){
         ArrayList<ArrayList<Twist>> solutions = new ArrayList<ArrayList<Twist>>();
         
         if (cube.isSolved()) {
             // return the solution for this cube
-            solutions.add(cube.getTwists());
+            solutions.add(new ArrayList<Twist>(cube.getTwists()));
             return solutions;
         }
 
-        if (cube.getNumTwists() >= cube.getBound() || cube.getNumTwists() >= bestSolution) {
+        if (cube.getNumTwists() >= cube.getBound()) {
             return null;
         } 
         
@@ -567,14 +567,13 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
 
-        int currentBestSolution = (solutions.size() > 0) ? solutions.get(0).size() : Integer.MAX_VALUE;
         for (Cube child : children) {
             // recursion step
-            ArrayList<ArrayList<Twist>> childSolutions = solutions(child, cache, currentBestSolution);
+            ArrayList<ArrayList<Twist>> childSolutions = solutions(child, cache);
             if(childSolutions != null){
                 for(ArrayList<Twist> solution : childSolutions){
                     if(!solutions.contains(solution)){
-                        solutions.add(solution);
+                        solutions.add(new ArrayList<Twist>(solution));
                     }
                 }
                 
@@ -604,7 +603,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         // cache used for cube objects. Doing new Cube() for every move
         // overloads the garbage collector
         CubeCache cache = new CubeCache(cube.getSize());
-        return solutions(cube, cache, numTwists);
+        return solutions(cube, cache);
     }
     
     private void work(IbisIdentifier master){
