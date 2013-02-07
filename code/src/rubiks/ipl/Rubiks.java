@@ -108,7 +108,8 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     private long runtimeMs;
     
     private final Object numSlavesLock = new Object();;
-    private int numSlaves = 0;
+    
+    private final ArrayList<IbisIdentifier> joinedIbises = new ArrayList<IbisIdentifier>();
     
     
     @Override
@@ -493,8 +494,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 + ". Num twists: " + solutions.get(0).size(), null);
         
         SendPort sendPort = ibis.createSendPort(BROADCAST_PORT_TYPE);
-        IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
-        if(joinedIbises.length <= 1){
+        if(joinedIbises.size() <= 1){
             log(LogLevel.VERBOSE, "Only one node. Not broadcasting", null);
             return;
         }
@@ -510,7 +510,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             }
         }
         
-        log(LogLevel.DEBUG, "Broadcasting to " + (joinedIbises.length-1) + " nodes", null);
+        log(LogLevel.DEBUG, "Broadcasting to " + (joinedIbises.size()-1) + " nodes", null);
         
         try {
             WriteMessage message = sendPort.newMessage();
@@ -800,21 +800,17 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
 
     @Override
     public void joined(IbisIdentifier joinedIbis) {
-        if(!isMaster) return;
-        
         synchronized (numSlavesLock) {
-            numSlaves++;
-            log(LogLevel.DEBUG, "New worker. Total: " + numSlaves, null);
+            joinedIbises.add(joinedIbis);
+            log(LogLevel.DEBUG, "New worker. Total: " + joinedIbises.size(), null);
         }
     }
 
     @Override
     public void left(IbisIdentifier leftIbis) {
-        if(!isMaster) return;
-        
         synchronized (numSlavesLock) {
-            numSlaves--;
-            log(LogLevel.DEBUG, "Worker left. Total: " + numSlaves, null);
+            joinedIbises.remove(leftIbis);
+            log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
         }
     }
 
