@@ -671,8 +671,10 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             }
             
             // let master print current bound
-            if(isMaster && cubes[0].getBound()+1 > lastPrintedBound){
-                System.out.print(" " + (cubes[0].getBound()+1));
+            if(cubes[0].getBound()+1 > lastPrintedBound){
+                if(isMaster){
+                    System.out.print(" " + (cubes[0].getBound()+1));
+                }
                 lastPrintedBound = cubes[0].getBound()+1;
             }
             
