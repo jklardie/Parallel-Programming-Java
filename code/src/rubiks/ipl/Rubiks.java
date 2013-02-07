@@ -668,7 +668,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             // find solutions
             for(Cube cube : cubes){
-                if(shouldStopWorking || cube.getBound() >= numTwists){
+                if(shouldStopWorking || cube.getTwists().size() >= numTwists){
                     log(LogLevel.VERBOSE, "Should stop working, or by bound is higher than result. Stopping", null);
                     shouldStopWorking = true;
                     break;
