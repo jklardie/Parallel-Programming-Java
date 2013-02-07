@@ -557,12 +557,6 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             return null;
         } 
         
-        // let master print current bound
-        if(isMaster && (cube.getNumTwists()+1 > lastPrintedBound)){
-            System.out.print(" " + (cube.getNumTwists()+1));
-            lastPrintedBound = (cube.getNumTwists()+1);
-        }
-        
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache);
@@ -641,6 +635,13 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                     allCubes.addAll(Arrays.asList(cubes));
                 }
             }
+            
+            // let master print current bound
+            if(isMaster && cubes[0].getBound()+1 > lastPrintedBound){
+                System.out.print(" " + (cubes[0].getBound()+1));
+                lastPrintedBound = cubes[0].getBound()+1;
+            }
+            
             
             // find solutions
             for(Cube cube : cubes){
