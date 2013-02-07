@@ -565,6 +565,10 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         Cube[] children = cube.generateChildren(cache);
 
         for (Cube child : children) {
+            if(shouldStopWorking){
+                break;
+            }
+            
             // recursion step
             ArrayList<ArrayList<Twist>> childSolutions = solutions(child, cache);
             if(childSolutions != null){
@@ -681,6 +685,10 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             // find solutions
             for(Cube cube : cubes){
+                if(shouldStopWorking){
+                    break;
+                }
+                
                 // increase bound on cube
                 cube.setBound(cube.getBound()+1);
                 
