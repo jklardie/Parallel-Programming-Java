@@ -13,6 +13,7 @@ import ibis.ipl.PortType;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.ReceivePortIdentifier;
+import ibis.ipl.RegistryEventHandler;
 import ibis.ipl.SendPort;
 import ibis.ipl.WriteMessage;
 
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-public class Rubiks implements MessageUpcall{
+public class Rubiks implements MessageUpcall, RegistryEventHandler {
 
     private enum LogLevel {
         VERBOSE,        // all info
@@ -106,6 +107,9 @@ public class Rubiks implements MessageUpcall{
     private int lastPrintedBound;
     private long runtimeMs;
     
+    private final Object numSlavesLock = new Object();;
+    private int numSlaves = 0;
+    
     
     @Override
     public void upcall(ReadMessage msg) throws IOException, ClassNotFoundException {
@@ -176,7 +180,7 @@ public class Rubiks implements MessageUpcall{
             
             shouldStopWorking = true;
         } else if(numTwists == this.numTwists){
-            // the received result is the same as our result, so we might find new ways
+            // the received result is the same as our result, so we might find new solutions
             for(ArrayList<Twist> solution : solutions){
                 if(!this.solutions.contains(solution)){
                     this.solutions.add(solution);
@@ -711,7 +715,7 @@ public class Rubiks implements MessageUpcall{
         
         // create ibis instance 
         try {
-            ibis = IbisFactory.createIbis(IBIS_CAPABILITIES, null, WORK_REQ_PORT_TYPE, REPLY_PORT_TYPE, BROADCAST_PORT_TYPE);
+            ibis = IbisFactory.createIbis(IBIS_CAPABILITIES, this, WORK_REQ_PORT_TYPE, REPLY_PORT_TYPE, BROADCAST_PORT_TYPE);
             log(LogLevel.VERBOSE, "Created ibis instance", null);
         } catch (IbisCreationFailedException e) {
             log(LogLevel.ERROR, "Creating ibis instance failed", e);
@@ -770,7 +774,7 @@ public class Rubiks implements MessageUpcall{
             }
         }
         
-        // TODO: maybe this can be removed?
+        
         if(isMaster){
             // the master waits for all slaves to terminate
             ibis.registry().waitUntilTerminated();
@@ -791,5 +795,54 @@ public class Rubiks implements MessageUpcall{
 
     public static void main(String args[]){
         new Rubiks().run(args);
+    }
+
+    @Override
+    public void joined(IbisIdentifier joinedIbis) {
+        if(!isMaster) return;
+        
+        synchronized (numSlavesLock) {
+            numSlaves++;
+            log(LogLevel.DEBUG, "New worker. Total: " + numSlaves, null);
+        }
+    }
+
+    @Override
+    public void left(IbisIdentifier leftIbis) {
+        if(!isMaster) return;
+        
+        synchronized (numSlavesLock) {
+            numSlaves--;
+        }
+    }
+
+    @Override
+    public void died(IbisIdentifier corpse) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void gotSignal(String signal, IbisIdentifier source) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void electionResult(String electionName, IbisIdentifier winner) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void poolClosed() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void poolTerminated(IbisIdentifier source) {
+        // TODO Auto-generated method stub
+        
     }
 }
