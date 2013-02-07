@@ -550,6 +550,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         
         if (cube.isSolved()) {
             // return the solution for this cube
+            log(LogLevel.VERBOSE, "Cube solved. getNumTwists(): " + cube.getNumTwists() + ". getTwists().size(): " + cube.getTwists().size(), null);
             solutions.add(cube.getTwists());
             return solutions;
         }
