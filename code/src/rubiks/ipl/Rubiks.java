@@ -183,16 +183,18 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
             
             shouldStopWorking = true;
         } else if(numTwists == this.numTwists){
-            log(LogLevel.VERBOSE, "Result is equal to mine, add new solutions", null);
+            log(LogLevel.VERBOSE, "Result is equal to mine, only master stores it", null);
             
             // the received result is the same as our result, so we might find new solutions
-            for(ArrayList<Twist> solution : solutions){
-                if(!this.solutions.contains(solution)){
-                    this.solutions.add(solution);
+            if(isMaster){
+                for(ArrayList<Twist> solution : solutions){
+                    if(!this.solutions.contains(solution)){
+                        this.solutions.add(solution);
+                    }
                 }
+                this.numSolutions = this.solutions.size();
             }
             
-            numSolutions = this.solutions.size();
         } else {
             log(LogLevel.VERBOSE, "Result is worse than mine, so ignore", null);
             // ignore, our result is better
@@ -553,14 +555,11 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
 
         if (cube.getNumTwists() >= cube.getBound()) {
             return null;
-        }
-        
-        if(shouldStopWorking || cube.getTwists().size() >= numTwists){
-            log(LogLevel.VERBOSE, "Should stop working, or by bound is higher than result. Stopping", null);
+        } else if(cube.getNumTwists() >= numTwists || shouldStopWorking){
             shouldStopWorking = true;
             return null;
         }
-
+        
         // let master print current bound
         if(isMaster && (cube.getNumTwists()+1 > lastPrintedBound)){
             System.out.print(" " + (cube.getNumTwists()+1));
@@ -611,7 +610,7 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     }
     
     private void work(IbisIdentifier master){
-        ArrayList<ArrayList<Twist>> solutions = new ArrayList<ArrayList<Twist>>();
+        ArrayList<ArrayList<Twist>> mySolutions = new ArrayList<ArrayList<Twist>>();
         
         ArrayList<Cube> allCubes = new ArrayList<Cube>();
         Cube[] cubes = null;
@@ -646,49 +645,42 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
                 }
             }
             
-            if(solutions.size() > 0){
-                log(LogLevel.VERBOSE, "Solution twists: " + solutions.get(0).size(), null);
-            }
-            
-            if(solutions.size() > 0 && cubes[0].getTwists().size()+1 > solutions.get(0).size()){
-                numTwists = solutions.get(0).size();
-                numSolutions = solutions.size();
-                this.solutions = solutions;
-                
-                // we found the solutions, and have no twists within this bound to explore
-                // so we broadcast the solutions, and stop working
-                try {
-                    broadcastSolutions(solutions);
-                } catch (IOException e) {
-                    log(LogLevel.ERROR, "Failed broadcasting solutions", e);
-                }
-                
-                return;
-            } else if(this.solutions != null && this.solutions.size() > 0 && cubes[0].getBound()+1 > numTwists){
-                // we received a result that is better than our result, so stop working
-                return;
-            }
-            
             // find solutions
             for(Cube cube : cubes){
-                if(shouldStopWorking || cube.getTwists().size() >= numTwists){
-                    log(LogLevel.VERBOSE, "Should stop working, or by bound is higher than result. Stopping", null);
-                    shouldStopWorking = true;
-                    break;
-                }
-                
                 // increase bound on cube
                 cube.setBound(cube.getBound()+1);
                 
                 ArrayList<ArrayList<Twist>> tmpSolutions = solve(cube);
                 
-                // add all solutions we found so far to the solutions list
-                for(ArrayList<Twist> solution : tmpSolutions){
-                    if(!solutions.contains(solution)){
-                        solutions.add(solution);
+                if(tmpSolutions != null){
+                    // add all solutions we found so far to the solutions list
+                    for(ArrayList<Twist> solution : tmpSolutions){
+                        if(!mySolutions.contains(solution)){
+                            mySolutions.add(solution);
+                        }
                     }
                 }
+            }
+            
+            if(!requestMoreWork && mySolutions.size() > 0 
+                    && cubes[0].getNumTwists() >= mySolutions.get(0).size()
+                    && mySolutions.get(0).size() <= numTwists){
+                numTwists = mySolutions.get(0).size();
+                numSolutions = mySolutions.size();
+                this.solutions = mySolutions;
                 
+                // we found the solutions, and have no twists within this bound to explore
+                // so we broadcast the solutions, and stop working
+                try {
+                    broadcastSolutions(mySolutions);
+                } catch (IOException e) {
+                    log(LogLevel.ERROR, "Failed broadcasting solutions", e);
+                }
+                
+                return;
+            } else if(this.solutions != null && this.solutions.size() > 0 && cubes[0].getNumTwists() >= numTwists){
+                // we received a result that is better than our result, so stop working
+                return;
             }
         }
     }
