@@ -510,13 +510,15 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
         
         SendPort sendPort = ibis.createSendPort(BROADCAST_PORT_TYPE);
         
-        for (IbisIdentifier joinedIbis : joinedIbises) {
-            if(!joinedIbis.equals(ibis.identifier())){
-                // broadcast to all joined nodes, except ourselves.
-                try {
-                    sendPort.connect(joinedIbis, BROADCAST_PORT_NAME);
-                } catch (ConnectionFailedException e) {
-                    log(LogLevel.WARN, "Connecting for broadcast failed. Ignoring..", e);
+        synchronized(joinedIbises){
+            for (IbisIdentifier joinedIbis : joinedIbises) {
+                if(!joinedIbis.equals(ibis.identifier())){
+                    // broadcast to all joined nodes, except ourselves.
+                    try {
+                        sendPort.connect(joinedIbis, BROADCAST_PORT_NAME);
+                    } catch (ConnectionFailedException e) {
+                        log(LogLevel.WARN, "Connecting for broadcast failed. Ignoring..", e);
+                    }
                 }
             }
         }
@@ -833,20 +835,25 @@ public class Rubiks implements MessageUpcall, RegistryEventHandler {
     @Override
     public void joined(IbisIdentifier joinedIbis) {
         synchronized (numWorkersLock) {
-            joinedIbises.add(joinedIbis);
-            
-            if(isMaster) log(LogLevel.DEBUG, "New worker. Total: " + joinedIbises.size(), null);
+            synchronized(joinedIbises){
+                joinedIbises.add(joinedIbis);
+                if(isMaster) log(LogLevel.DEBUG, "New worker. Total: " + joinedIbises.size(), null);
+            }
         }
     }
 
     @Override
     public void left(IbisIdentifier leftIbis) {
+        int newSize;
         synchronized (numWorkersLock) {
-            joinedIbises.remove(leftIbis);
+            synchronized(joinedIbises){
+                joinedIbises.remove(leftIbis);
+                newSize = joinedIbises.size();
+            }
             
-            if(isMaster) log(LogLevel.DEBUG, "Worker left. Total: " + joinedIbises.size(), null);
+            if(isMaster) log(LogLevel.DEBUG, "Worker left. Total: " + newSize, null);
             
-            if(isMaster && joinedIbises.size() == 1){
+            if(isMaster && newSize == 1){
                 log(LogLevel.DEBUG, "Last worker left, waking up", null);
                 
                 // last worker to leave, so notify master
